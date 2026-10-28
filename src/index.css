@@ -1,0 +1,578 @@
+/* ============================================================
+   MACSAC STUDIO — PREMIUM WEBSITE BUILDER PLATFORM CSS
+   Brand: MACSAC Multimedia (Copper & Bronze Luxury Identity)
+   ============================================================ */
+
+:root {
+  /* MACSAC Brand Light Theme Palette */
+  --bg-primary: #f6f2eb;
+  --bg-secondary: #fbfaf8;
+  --bg-tertiary: #eae2d5;
+  --bg-card: rgba(251, 250, 248, 0.94);
+  --bg-header: rgba(246, 242, 235, 0.9);
+  
+  --text-primary: #2d2622;
+  --text-secondary: #5e514a;
+  --text-muted: #94857d;
+  
+  --copper-light: #e6bfa7;
+  --copper-medium: #b1704e;
+  --copper-dark: #703c21;
+  --copper-accent: #a6603a;
+  --copper-glow: rgba(177, 112, 78, 0.25);
+  
+  --border-color: #ebdcd0;
+  --border-color-light: #f5eedf;
+  
+  /* Gradients */
+  --grad-copper: linear-gradient(135deg, #b1704e 0%, #e6bfa7 100%);
+  --grad-bronze: linear-gradient(135deg, #703c21 0%, #a6603a 100%);
+  --grad-sunset: linear-gradient(135deg, #a6603a 0%, #e6bfa7 100%);
+  --grad-card: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(251, 250, 248, 0.95) 100%);
+  
+  /* Typography */
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  
+  /* Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+  
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(112, 60, 33, 0.04);
+  --shadow-md: 0 10px 30px rgba(112, 60, 33, 0.08);
+  --shadow-lg: 0 20px 48px rgba(112, 60, 33, 0.12);
+  --shadow-copper: 0 8px 24px rgba(177, 112, 78, 0.28);
+}
+
+/* Studio Dark Theme (Obsidian Copper) */
+[data-theme="dark"] {
+  --bg-primary: #090706;
+  --bg-secondary: #14100e;
+  --bg-tertiary: #1f1916;
+  --bg-card: rgba(20, 16, 14, 0.94);
+  --bg-header: rgba(9, 7, 6, 0.92);
+  
+  --text-primary: #fdfbf9;
+  --text-secondary: #dcd2ca;
+  --text-muted: #a6988f;
+  
+  --border-color: #332721;
+  --border-color-light: #241c18;
+  
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.8);
+  --shadow-copper: 0 8px 28px rgba(177, 112, 78, 0.35);
+  
+  --grad-card: linear-gradient(180deg, rgba(26, 21, 18, 0.95) 0%, rgba(18, 14, 12, 0.98) 100%);
+}
+
+/* Base Resets */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+body:not([data-theme="dark"]) h1,
+body:not([data-theme="dark"]) h2,
+body:not([data-theme="dark"]) h3 {
+  color: #3d2111;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input, textarea, select {
+  font-family: inherit;
+}
+
+/* Layout Utilities */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Typography Gradient */
+.text-gradient {
+  background: var(--grad-copper);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 26px;
+  background: var(--copper-medium);
+  color: #ffffff !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-copper);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.btn-primary:hover {
+  background: var(--copper-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(177, 112, 78, 0.38);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-secondary:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--copper-light);
+  transform: translateY(-2px);
+}
+
+.btn-sm {
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+}
+
+/* Badges */
+.badge-copper {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  background: rgba(177, 112, 78, 0.12);
+  color: var(--copper-dark);
+  border: 1px solid rgba(177, 112, 78, 0.25);
+}
+
+[data-theme="dark"] .badge-copper {
+  color: var(--copper-light);
+  background: rgba(177, 112, 78, 0.2);
+}
+
+/* Header & Navigation */
+.studio-nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: all 0.3s ease;
+}
+
+.nav-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+}
+
+.brand-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--grad-copper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 800;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 12px rgba(177, 112, 78, 0.3);
+}
+
+.brand-text-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.brand-title span.studio-pill {
+  font-size: 0.7rem;
+  padding: 2px 7px;
+  background: var(--copper-medium);
+  color: white;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.brand-sub {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.nav-link {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+  position: relative;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--copper-medium);
+}
+
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.theme-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+  border-color: var(--copper-medium);
+  color: var(--copper-medium);
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-container {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--copper-medium);
+}
+
+/* ============================================================
+   GRAPESJS CORE — MACSAC STUDIO INTEGRATION STYLES
+   These override default GrapesJS UI to match the copper
+   luxury identity and make the editor feel native.
+   ============================================================ */
+
+/* Canvas frame: remove default GrapesJS gray background */
+#gjs .gjs-frame-wrapper {
+  background: transparent !important;
+}
+
+/* Block Manager: 2-column masonry-style grid */
+#gjs-blocks .gjs-blocks-c {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 8px !important;
+  padding: 8px !important;
+}
+
+#gjs-blocks .gjs-block {
+  padding: 10px 8px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--bg-card) !important;
+  cursor: grab !important;
+  text-align: center !important;
+  font-size: 0.72rem !important;
+  font-weight: 600 !important;
+  color: var(--text-secondary) !important;
+  transition: border-color 0.2s, background 0.2s !important;
+}
+
+#gjs-blocks .gjs-block:hover {
+  border-color: var(--copper-medium) !important;
+  background: rgba(177, 112, 78, 0.07) !important;
+  color: var(--copper-medium) !important;
+}
+
+#gjs-blocks .gjs-block__media svg {
+  color: var(--copper-medium) !important;
+  margin: 0 auto 4px !important;
+  display: block !important;
+}
+
+/* Category titles */
+#gjs-blocks .gjs-block-category .gjs-title {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  padding: 8px 12px !important;
+}
+
+/* Style Manager sectors */
+#gjs-styles .gjs-sm-sector {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+#gjs-styles .gjs-sm-sector-title {
+  background: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  font-size: 0.74rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  padding: 8px 12px !important;
+}
+
+#gjs-styles .gjs-sm-property {
+  padding: 8px 12px !important;
+}
+
+#gjs-styles .gjs-sm-label {
+  color: var(--text-secondary) !important;
+  font-size: 0.74rem !important;
+  font-weight: 600 !important;
+}
+
+#gjs-styles input,
+#gjs-styles select {
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 6px !important;
+  color: var(--text-primary) !important;
+  font-size: 0.8rem !important;
+  padding: 5px 8px !important;
+  width: 100% !important;
+}
+
+#gjs-styles input:focus,
+#gjs-styles select:focus {
+  border-color: var(--copper-medium) !important;
+  outline: none !important;
+}
+
+/* Layers */
+#gjs-layers .gjs-layer-name {
+  color: var(--text-primary) !important;
+  font-size: 0.8rem !important;
+}
+
+#gjs-layers .gjs-layer {
+  background: transparent !important;
+  border-bottom: 1px solid var(--border-color-light) !important;
+}
+
+#gjs-layers .gjs-layer.gjs-hovered {
+  background: rgba(177, 112, 78, 0.05) !important;
+}
+
+#gjs-layers .gjs-layer.gjs-selected {
+  background: rgba(177, 112, 78, 0.1) !important;
+}
+
+/* Trait Manager */
+#gjs-traits .gjs-trt-trait {
+  padding: 8px 12px !important;
+  border-bottom: 1px solid var(--border-color-light) !important;
+}
+
+#gjs-traits .gjs-label {
+  color: var(--text-secondary) !important;
+  font-size: 0.74rem !important;
+  font-weight: 600 !important;
+}
+
+#gjs-traits input,
+#gjs-traits select,
+#gjs-traits textarea {
+  background: var(--bg-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 6px !important;
+  color: var(--text-primary) !important;
+  font-size: 0.8rem !important;
+  padding: 5px 8px !important;
+  width: 100% !important;
+}
+
+/* GrapesJS canvas wrapper background */
+.gjs-cv-canvas {
+  background: var(--bg-primary) !important;
+}
+
+/* GrapesJS selected element highlight — copper glow */
+.gjs-selected {
+  outline: 2px solid var(--copper-medium) !important;
+  outline-offset: -2px !important;
+}
+
+/* GrapesJS toolbar for selected element */
+.gjs-toolbar {
+  background: var(--copper-dark) !important;
+  border-radius: 6px !important;
+  padding: 2px !important;
+}
+
+.gjs-toolbar-item {
+  color: #fff !important;
+}
+
+/* GrapesJS badge on selected element */
+.gjs-badge {
+  background: var(--copper-medium) !important;
+  color: #fff !important;
+  border-radius: 4px !important;
+  font-size: 0.7rem !important;
+  font-weight: 700 !important;
+  padding: 2px 6px !important;
+}
+
+/* GrapesJS placeholder highlight */
+.gjs-placeholder {
+  border: 2px dashed var(--copper-medium) !important;
+  background: rgba(177, 112, 78, 0.07) !important;
+}
+
+/* GrapesJS Empty state canvas text */
+.gjs-empty-state-text {
+  color: var(--text-muted) !important;
+  font-size: 1rem !important;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

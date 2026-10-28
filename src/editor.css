@@ -1,0 +1,802 @@
+/* ============================================================
+   MACSAC STUDIO — EDITOR INTERFACE ISOLATION STYLESHEET
+   Scoped under #macsac-editor-root to prevent template CSS
+   from bleeding into editor panels, sidebars, and controls.
+   ============================================================ */
+
+/* ── Editor Root Container ─────────────────────────────────── */
+#macsac-editor-root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  background: #e8e0d8;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #2d2622;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Editor Work Area (Left + Canvas + Right) ──────────────── */
+#macsac-editor-root .editor-work-area {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Left Sidebar ──────────────────────────────────────────── */
+#macsac-editor-root .editor-left-sidebar {
+  flex-shrink: 0;
+  display: flex;
+  height: 100%;
+  background: #faf9f7;
+  border-right: 1px solid #e8ddd4;
+  z-index: 20;
+  overflow: hidden;
+}
+
+#macsac-editor-root .editor-left-sidebar * {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  box-sizing: border-box;
+}
+
+#macsac-editor-root .editor-left-sidebar input,
+#macsac-editor-root .editor-left-sidebar select,
+#macsac-editor-root .editor-left-sidebar textarea {
+  color: #2d2622 !important;
+  background-color: #f6f2eb !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.84rem !important;
+}
+
+#macsac-editor-root .editor-left-sidebar input::placeholder,
+#macsac-editor-root .editor-left-sidebar textarea::placeholder {
+  color: #b0a099 !important;
+}
+
+#macsac-editor-root .editor-left-sidebar button {
+  font-family: 'Inter', sans-serif !important;
+  cursor: pointer;
+}
+
+#macsac-editor-root .editor-left-sidebar h1,
+#macsac-editor-root .editor-left-sidebar h2,
+#macsac-editor-root .editor-left-sidebar h3,
+#macsac-editor-root .editor-left-sidebar h4,
+#macsac-editor-root .editor-left-sidebar h5,
+#macsac-editor-root .editor-left-sidebar span,
+#macsac-editor-root .editor-left-sidebar p,
+#macsac-editor-root .editor-left-sidebar label {
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* ── Center Canvas ─────────────────────────────────────────── */
+#macsac-editor-root .editor-canvas-area {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  position: relative;
+}
+
+/* Canvas background (the "desktop" around the website preview) */
+#macsac-editor-root .editor-canvas-area.canvas-bg-grid {
+  background-color: #ddd6cd;
+  background-image:
+    linear-gradient(rgba(177,112,78,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(177,112,78,0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* The website preview frame */
+#macsac-editor-root .website-preview-frame {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+#macsac-editor-root .website-preview-frame.desktop-frame {
+  width: 100%;
+  min-height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+#macsac-editor-root .website-preview-frame.tablet-frame {
+  width: 768px;
+  min-height: calc(100% - 64px);
+  margin: 32px 16px;
+  border-radius: 16px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.28), 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+#macsac-editor-root .website-preview-frame.mobile-frame {
+  width: 390px;
+  min-height: calc(100% - 64px);
+  margin: 32px 16px;
+  border-radius: 24px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.28), 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+/* Device chrome bar (shown on tablet/mobile frames) */
+#macsac-editor-root .device-chrome-bar {
+  height: 24px;
+  background: #1a1614;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'Inter', monospace, sans-serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #7a6a5a;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+#macsac-editor-root .device-chrome-bar .chrome-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3d3028;
+}
+
+/* ── Right Sidebar ─────────────────────────────────────────── */
+#macsac-editor-root .editor-right-sidebar {
+  flex-shrink: 0;
+  width: 292px;
+  height: 100%;
+  background: #faf9f7;
+  border-left: 1px solid #e8ddd4;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#macsac-editor-root .editor-right-sidebar * {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+  box-sizing: border-box;
+}
+
+#macsac-editor-root .editor-right-sidebar input,
+#macsac-editor-root .editor-right-sidebar select,
+#macsac-editor-root .editor-right-sidebar textarea {
+  color: #2d2622 !important;
+  background-color: #f6f2eb !important;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.84rem !important;
+}
+
+#macsac-editor-root .editor-right-sidebar input::placeholder,
+#macsac-editor-root .editor-right-sidebar textarea::placeholder {
+  color: #b0a099 !important;
+}
+
+#macsac-editor-root .editor-right-sidebar button {
+  font-family: 'Inter', sans-serif !important;
+}
+
+#macsac-editor-root .editor-right-sidebar h1,
+#macsac-editor-root .editor-right-sidebar h2,
+#macsac-editor-root .editor-right-sidebar h3,
+#macsac-editor-root .editor-right-sidebar h4,
+#macsac-editor-root .editor-right-sidebar span,
+#macsac-editor-root .editor-right-sidebar p,
+#macsac-editor-root .editor-right-sidebar label {
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* ── Bottom Toolbar ────────────────────────────────────────── */
+#macsac-editor-root .editor-bottom-bar {
+  height: 48px;
+  flex-shrink: 0;
+  background: #1a1614;
+  border-top: 1px solid #2d2420;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 0;
+  z-index: 30;
+  font-family: 'Inter', sans-serif;
+}
+
+#macsac-editor-root .editor-bottom-bar * {
+  font-family: 'Inter', sans-serif !important;
+  box-sizing: border-box;
+}
+
+#macsac-editor-root .editor-bottom-bar button {
+  cursor: pointer;
+  font-family: 'Inter', sans-serif !important;
+}
+
+#macsac-editor-root .editor-bottom-bar input {
+  color: #f0ebe4 !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* ── Bottom Bar Sections ─────────────────────────────────────*/
+.ebb-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ebb-center {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.ebb-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.ebb-divider {
+  width: 1px;
+  height: 20px;
+  background: #3d3028;
+  margin: 0 8px;
+  flex-shrink: 0;
+}
+
+/* ── Editor Icon Buttons ────────────────────────────────────── */
+.editor-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #9a8a80;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.editor-icon-btn:hover {
+  background: rgba(177,112,78,0.12);
+  color: #d4956e;
+}
+
+.editor-icon-btn:disabled {
+  color: #4a3a30;
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.editor-icon-btn.active {
+  background: rgba(177,112,78,0.15);
+  color: #b1704e;
+}
+
+/* ── Device Picker Pills ─────────────────────────────────────── */
+.device-pills {
+  display: flex;
+  align-items: center;
+  background: #120f0d;
+  border-radius: 20px;
+  padding: 2px;
+  gap: 1px;
+}
+
+.device-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 18px;
+  border: none;
+  background: transparent;
+  color: #7a6a5a;
+  font-size: 0.73rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.device-pill:hover {
+  color: #c4a080;
+}
+
+.device-pill.active {
+  background: #b1704e;
+  color: #fff;
+}
+
+/* ── Save Status Indicator ───────────────────────────────────── */
+.save-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.save-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.save-dot.saved {
+  background: #22c55e;
+}
+
+.save-dot.saving {
+  background: #f59e0b;
+  animation: pulse-save 0.8s ease-in-out infinite;
+}
+
+@keyframes pulse-save {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Accordion Panels (Right Sidebar) ────────────────────────── */
+.prop-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f0ebe3;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 8px;
+  font-family: 'Inter', sans-serif !important;
+  transition: background 0.15s ease;
+}
+
+.prop-accordion-header:hover {
+  background: #e8e0d5;
+}
+
+.prop-accordion-header span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #3d2e28;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.prop-field {
+  margin-bottom: 12px;
+}
+
+.prop-label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #7a6a60;
+  margin-bottom: 4px;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.prop-input {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 6px;
+  border: 1px solid #e0d4c8;
+  background: #f6f2eb;
+  color: #2d2622;
+  font-family: 'Inter', sans-serif !important;
+  font-size: 0.84rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+  resize: vertical;
+}
+
+.prop-input:focus {
+  border-color: #b1704e;
+}
+
+.prop-input::placeholder {
+  color: #b0a099;
+}
+
+/* ── Section Selector (Left Sidebar Section List) ──────────── */
+.section-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 10px;
+  border-radius: 7px;
+  background: #f5f0e8;
+  border: 1px solid #e8ddd4;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.section-row:hover {
+  background: #ede5d8;
+  border-color: #d4b89a;
+}
+
+.section-row.selected {
+  background: rgba(177,112,78,0.08);
+  border-color: #b1704e;
+  border-left: 3px solid #b1704e;
+}
+
+.section-row .section-type {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #3d2e28;
+  text-transform: capitalize;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.section-row .section-title {
+  font-size: 0.7rem;
+  color: #9a8a80;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* ── Page Row (Left Sidebar Pages) ──────────────────────────── */
+.page-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 10px;
+  border-radius: 7px;
+  background: #f5f0e8;
+  border: 1px solid #e8ddd4;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: all 0.15s ease;
+}
+
+.page-row:hover {
+  background: #ede5d8;
+}
+
+.page-row.active {
+  background: rgba(177,112,78,0.08);
+  border-color: #b1704e;
+}
+
+/* ── Section Add Buttons ─────────────────────────────────────── */
+.section-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: #f5f0e8;
+  border: 1px solid #e8ddd4;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #3d2e28;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: capitalize;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.section-add-btn:hover {
+  border-color: #b1704e;
+  color: #b1704e;
+  background: rgba(177,112,78,0.06);
+}
+
+/* ── Left Sidebar Icon Rail ──────────────────────────────────── */
+.sidebar-icon-rail {
+  width: 48px;
+  flex-shrink: 0;
+  background: #f0ebe3;
+  border-right: 1px solid #e8ddd4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0;
+  gap: 2px;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.sidebar-rail-btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #9a8a80;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.sidebar-rail-btn:hover {
+  background: rgba(177,112,78,0.1);
+  color: #8a6050;
+}
+
+.sidebar-rail-btn.active {
+  background: rgba(177,112,78,0.15);
+  color: #b1704e;
+}
+
+.sidebar-rail-btn .rail-label {
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  font-family: 'Inter', sans-serif !important;
+  line-height: 1;
+}
+
+/* ── Sidebar Panel ───────────────────────────────────────────── */
+.sidebar-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+  width: 232px;
+}
+
+.sidebar-panel-header {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid #e8ddd4;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f5f1eb;
+}
+
+.sidebar-panel-header h3 {
+  font-size: 0.86rem;
+  font-weight: 800;
+  color: #2d2622;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.sidebar-panel-header .panel-subtitle {
+  font-size: 0.7rem;
+  color: #9a8a80;
+  margin-top: 1px;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.sidebar-panel-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px;
+}
+
+/* ── Selection Highlight on Canvas ──────────────────────────── */
+.website-section-wrapper {
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.website-section-wrapper.is-selected {
+  outline: 2px solid #b1704e;
+  outline-offset: -2px;
+}
+
+/* Floating section action bar (shown on selected section) */
+.section-action-bar {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  z-index: 40;
+  background: rgba(26,22,20,0.92);
+  border-radius: 8px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  backdrop-filter: blur(8px);
+}
+
+.section-action-bar .section-type-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #b1704e;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding-right: 8px;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  margin-right: 4px;
+  font-family: 'Inter', sans-serif;
+}
+
+.section-action-bar button {
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.section-action-bar button:hover {
+  background: rgba(177,112,78,0.2);
+  color: #d4956e;
+}
+
+.section-action-bar button.danger:hover {
+  background: rgba(239,68,68,0.2);
+  color: #f87171;
+}
+
+/* ── Project Menu (Left Sidebar, Project Tab) ────────────────── */
+.project-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 7px;
+  border: 1px solid #e0d4c8;
+  background: #f5f0e8;
+  color: #3d2e28;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif !important;
+  margin-bottom: 6px;
+}
+
+.project-action-btn:hover {
+  border-color: #b1704e;
+  background: rgba(177,112,78,0.06);
+  color: #b1704e;
+}
+
+.project-action-btn.primary {
+  background: #b1704e;
+  border-color: #b1704e;
+  color: #fff;
+}
+
+.project-action-btn.primary:hover {
+  background: #a06040;
+  border-color: #a06040;
+  color: #fff;
+}
+
+/* ── Color Swatch Inputs ─────────────────────────────────────── */
+.color-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.color-row span {
+  font-size: 0.8rem;
+  color: #3d2e28;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.color-row input[type="color"] {
+  width: 36px;
+  height: 28px;
+  border-radius: 5px;
+  border: 1px solid #e0d4c8;
+  cursor: pointer;
+  padding: 2px;
+  background: transparent;
+}
+
+/* ── Theme Preset Buttons ────────────────────────────────────── */
+.theme-preset-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #e8ddd4;
+  background: #f5f0e8;
+  cursor: pointer;
+  margin-bottom: 5px;
+  transition: all 0.15s ease;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.theme-preset-btn:hover {
+  border-color: #b1704e;
+}
+
+.theme-preset-btn.active {
+  border-color: #b1704e;
+  background: rgba(177,112,78,0.07);
+}
+
+.theme-preset-btn .preset-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #3d2e28;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.theme-preset-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.1);
+  flex-shrink: 0;
+}
+
+/* ── Scrollbar Styling for Sidebars ─────────────────────────── */
+#macsac-editor-root ::-webkit-scrollbar {
+  width: 4px;
+}
+
+#macsac-editor-root ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#macsac-editor-root ::-webkit-scrollbar-thumb {
+  background: rgba(177,112,78,0.2);
+  border-radius: 2px;
+}
+
+#macsac-editor-root ::-webkit-scrollbar-thumb:hover {
+  background: rgba(177,112,78,0.4);
+}
+
+/* ── Section hover indicator (canvas) ───────────────────────── */
+.website-canvas-root .editable-section:hover:not(.is-selected) {
+  outline: 1px dashed rgba(177,112,78,0.4);
+  outline-offset: -1px;
+}
+
+/* ── Publish Modal ───────────────────────────────────────────── */
+.publish-modal-url {
+  background: #f6f2eb;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #e0d4c8;
+  font-family: 'Courier New', monospace;
+  font-size: 0.84rem;
+  color: #b1704e;
+  word-break: break-all;
+}
+
