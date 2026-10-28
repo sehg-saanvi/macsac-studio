@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Project,
   WebsitePage,
@@ -90,6 +90,80 @@ export const EditorView: React.FC<EditorViewProps> = ({
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [historyIndex, history]);
+
+  // Canvas Container Ref & Auto-Scroll Engine for Draggers
+  const canvasMainRef = useRef<HTMLElement | null>(null);
+  const autoScrollSpeedRef = useRef<number>(0);
+  const autoScrollAnimRef = useRef<number | null>(null);
+
+  const startAutoScrollLoop = () => {
+    if (autoScrollAnimRef.current !== null) return;
+    const loop = () => {
+      if (canvasMainRef.current && autoScrollSpeedRef.current !== 0) {
+        canvasMainRef.current.scrollTop += autoScrollSpeedRef.current;
+      }
+      autoScrollAnimRef.current = requestAnimationFrame(loop);
+    };
+    autoScrollAnimRef.current = requestAnimationFrame(loop);
+  };
+
+  const stopAutoScrollLoop = () => {
+    if (autoScrollAnimRef.current !== null) {
+      cancelAnimationFrame(autoScrollAnimRef.current);
+      autoScrollAnimRef.current = null;
+    }
+    autoScrollSpeedRef.current = 0;
+  };
+
+  const handlePointerDragMove = (clientY: number) => {
+    if (!canvasMainRef.current) return;
+    const rect = canvasMainRef.current.getBoundingClientRect();
+    const threshold = 140; // 140px active scroll zone from top/bottom
+    const maxSpeed = 24; // fast, smooth scroll speed
+
+    if (clientY < rect.top + threshold) {
+      // Dragger is near top edge: scroll UP
+      const distance = Math.max(0, clientY - rect.top);
+      const intensity = Math.max(0, Math.min(1, (threshold - distance) / threshold));
+      autoScrollSpeedRef.current = -Math.max(4, Math.round(intensity * maxSpeed));
+      startAutoScrollLoop();
+    } else if (clientY > rect.bottom - threshold) {
+      // Dragger is near bottom edge: scroll DOWN
+      const distance = Math.max(0, rect.bottom - clientY);
+      const intensity = Math.max(0, Math.min(1, (threshold - distance) / threshold));
+      autoScrollSpeedRef.current = Math.max(4, Math.round(intensity * maxSpeed));
+      startAutoScrollLoop();
+    } else {
+      // In middle: stop scrolling
+      autoScrollSpeedRef.current = 0;
+    }
+  };
+
+  useEffect(() => {
+    const handleGlobalDragOver = (e: DragEvent) => {
+      e.preventDefault();
+      if (e.clientY !== undefined) {
+        handlePointerDragMove(e.clientY);
+      }
+    };
+    const handleGlobalDragEnd = () => {
+      stopAutoScrollLoop();
+    };
+    const handleGlobalDrop = () => {
+      stopAutoScrollLoop();
+    };
+
+    window.addEventListener('dragover', handleGlobalDragOver);
+    window.addEventListener('dragend', handleGlobalDragEnd);
+    window.addEventListener('drop', handleGlobalDrop);
+
+    return () => {
+      window.removeEventListener('dragover', handleGlobalDragOver);
+      window.removeEventListener('dragend', handleGlobalDragEnd);
+      window.removeEventListener('drop', handleGlobalDrop);
+      stopAutoScrollLoop();
+    };
+  }, []);
 
   // Active Page resolution
   const activePage = project.pages.find((p) => p.id === project.activePageId) || project.pages[0];
@@ -254,6 +328,29 @@ export const EditorView: React.FC<EditorViewProps> = ({
         const [moved] = nextSecs.splice(fromIndex, 1);
         nextSecs.splice(toIndex, 0, moved);
         return { ...p, sections: nextSecs };
+      }
+      return p;
+    });
+    pushState({ ...project, pages: updatedPages, updatedAt: Date.now() });
+  };
+
+  // Reorder items inside a section
+  const handleReorderItems = (sectionId: string, fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    const updatedPages = project.pages.map((p) => {
+      if (p.id === project.activePageId) {
+        return {
+          ...p,
+          sections: p.sections.map((s) => {
+            if (s.id === sectionId && s.items) {
+              const nextItems = [...s.items];
+              const [moved] = nextItems.splice(fromIndex, 1);
+              nextItems.splice(toIndex, 0, moved);
+              return { ...s, items: nextItems };
+            }
+            return s;
+          }),
+        };
       }
       return p;
     });
@@ -487,6 +584,12 @@ export const EditorView: React.FC<EditorViewProps> = ({
 
         {/* Center Canvas */}
         <main
+          ref={canvasMainRef}
+          id="macsac-editor-canvas-container"
+          onDragOver={(e) => {
+            e.preventDefault();
+            handlePointerDragMove(e.clientY);
+          }}
           style={{
             flex: 1,
             minHeight: 0,
@@ -565,6 +668,7 @@ export const EditorView: React.FC<EditorViewProps> = ({
                 onUpdateSection={handleDirectSectionUpdate}
                 onUpdateItem={handleDirectItemUpdate}
                 onReorderSections={handleReorderSections}
+                onReorderItems={handleReorderItems}
                 viewport={viewport}
               />
             </div>

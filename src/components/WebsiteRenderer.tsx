@@ -63,6 +63,7 @@ interface WebsiteRendererProps {
   onUpdateSection?: (sectionId: string, updates: Partial<WebsiteSection>) => void;
   onUpdateItem?: (sectionId: string, itemId: string, updates: Partial<SectionItem>) => void;
   onReorderSections?: (fromIndex: number, toIndex: number) => void;
+  onReorderItems?: (sectionId: string, fromIndex: number, toIndex: number) => void;
   isInteractive?: boolean;
   viewport?: ViewportMode;
 }
@@ -93,6 +94,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
   onUpdateSection,
   onUpdateItem,
   onReorderSections,
+  onReorderItems,
   viewport = 'desktop',
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -104,9 +106,14 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
   const [toast, setToast] = useState<ToastMessage | null>(null);
   const [hoveredSectionId, setHoveredSectionId] = useState<string | null>(null);
 
-  // Drag-to-reorder state
+  // Section drag-to-reorder state
   const dragIndexRef = useRef<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+
+  // Item/Element drag-to-reorder state
+  const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+  const [draggedItemInfo, setDraggedItemInfo] = useState<{ sectionId: string; index: number } | null>(null);
+  const [dragOverItemId, setDragOverItemId] = useState<string | null>(null);
 
   const isMobile = viewport === 'mobile';
   const isTablet = viewport === 'tablet';
@@ -736,6 +743,13 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
                 onUpdateSection,
                 onUpdateItem,
                 onSelectSection,
+                onReorderItems,
+                hoveredItemId,
+                setHoveredItemId,
+                draggedItemInfo,
+                setDraggedItemInfo,
+                dragOverItemId,
+                setDragOverItemId,
               })}
             </div>
           );
@@ -1065,6 +1079,13 @@ interface SectionRendererParams {
   onUpdateSection?: (sectionId: string, updates: Partial<WebsiteSection>) => void;
   onUpdateItem?: (sectionId: string, itemId: string, updates: Partial<SectionItem>) => void;
   onSelectSection?: (sectionId: string) => void;
+  onReorderItems?: (sectionId: string, fromIndex: number, toIndex: number) => void;
+  hoveredItemId?: string | null;
+  setHoveredItemId?: (id: string | null) => void;
+  draggedItemInfo?: { sectionId: string; index: number } | null;
+  setDraggedItemInfo?: (info: { sectionId: string; index: number } | null) => void;
+  dragOverItemId?: string | null;
+  setDragOverItemId?: (id: string | null) => void;
 }
 
 function renderSectionContent(p: SectionRendererParams) {
@@ -1092,7 +1113,111 @@ function renderSectionContent(p: SectionRendererParams) {
     onUpdateSection,
     onUpdateItem,
     onSelectSection,
+    onReorderItems,
+    hoveredItemId,
+    setHoveredItemId,
+    draggedItemInfo,
+    setDraggedItemInfo,
+    dragOverItemId,
+    setDragOverItemId,
   } = p;
+
+  // Helper for rendering an element with hover dragger handle and drag-to-reorder support
+  const getItemDragProps = (it: SectionItem, itemIdx: number) => {
+    if (!isEditorMode) {
+      return {
+        onClick: () => onSelectItem(it),
+        isItemHovered: false,
+        isItemDragTarget: false,
+        isCurrentlyDragged: false,
+      };
+    }
+    const isItemHovered = hoveredItemId === it.id;
+    const isItemDragTarget = dragOverItemId === it.id;
+    const isCurrentlyDragged =
+      draggedItemInfo?.sectionId === section.id && draggedItemInfo?.index === itemIdx;
+
+    return {
+      draggable: true,
+      onDragStart: (e: React.DragEvent) => {
+        e.stopPropagation();
+        if (setDraggedItemInfo) {
+          setDraggedItemInfo({ sectionId: section.id, index: itemIdx });
+        }
+        e.dataTransfer.effectAllowed = 'move';
+      },
+      onDragOver: (e: React.DragEvent) => {
+        if (draggedItemInfo && draggedItemInfo.sectionId === section.id) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.dataTransfer.dropEffect = 'move';
+          if (setDragOverItemId && dragOverItemId !== it.id) {
+            setDragOverItemId(it.id);
+          }
+        }
+      },
+      onDragLeave: () => {
+        if (dragOverItemId === it.id && setDragOverItemId) {
+          setDragOverItemId(null);
+        }
+      },
+      onDrop: (e: React.DragEvent) => {
+        if (draggedItemInfo && draggedItemInfo.sectionId === section.id) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (onReorderItems && draggedItemInfo.index !== itemIdx) {
+            onReorderItems(section.id, draggedItemInfo.index, itemIdx);
+          }
+          if (setDraggedItemInfo) setDraggedItemInfo(null);
+          if (setDragOverItemId) setDragOverItemId(null);
+        }
+      },
+      onDragEnd: () => {
+        if (setDraggedItemInfo) setDraggedItemInfo(null);
+        if (setDragOverItemId) setDragOverItemId(null);
+      },
+      onMouseEnter: () => setHoveredItemId && setHoveredItemId(it.id),
+      onMouseLeave: () => setHoveredItemId && setHoveredItemId(null),
+      onClick: () => {
+        if (onSelectSection) onSelectSection(section.id);
+      },
+      isItemHovered,
+      isItemDragTarget,
+      isCurrentlyDragged,
+    };
+  };
+
+  const renderItemDraggerBadge = (it: SectionItem) => {
+    if (!isEditorMode || hoveredItemId !== it.id) return null;
+    return (
+      <div
+        title="Drag element to reorder"
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          zIndex: 15,
+          background: 'rgba(45,38,34,0.92)',
+          color: '#ffffff',
+          borderRadius: 6,
+          padding: '3px 8px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+          fontSize: '0.66rem',
+          fontWeight: 700,
+          cursor: 'grab',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          userSelect: 'none',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <GripVertical size={13} color="#b1704e" />
+        <span>DRAG</span>
+      </div>
+    );
+  };
 
   // Helper for inline editable text in editor mode
   const et = (
@@ -1559,43 +1684,46 @@ function renderSectionContent(p: SectionRendererParams) {
                 gap: isMobile ? 18 : isTablet ? 22 : 28,
               }}
             >
-              {(section.items || []).map((it) => (
-                <div
-                  key={it.id}
-                  onClick={() => {
-                    if (isEditorMode) {
-                      if (onSelectSection) onSelectSection(section.id);
-                    } else {
-                      onSelectItem(it);
-                    }
-                  }}
-                  style={{
-                    background: theme.cardBg,
-                    border: `1px solid ${theme.borderColor}`,
-                    borderRadius: theme.borderRadius,
-                    padding: isMobile ? '22px 18px' : '32px 26px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                  }}
-                >
+              {(section.items || []).map((it, itemIdx) => {
+                const dragProps = getItemDragProps(it, itemIdx);
+                return (
                   <div
+                    key={it.id}
+                    {...dragProps}
                     style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 12,
-                      background: `${theme.primaryColor}18`,
-                      color: theme.primaryColor,
+                      position: 'relative',
+                      background: theme.cardBg,
+                      border: dragProps.isItemDragTarget
+                        ? `2px dashed ${theme.primaryColor}`
+                        : dragProps.isItemHovered
+                        ? `1px solid ${theme.primaryColor}88`
+                        : `1px solid ${theme.borderColor}`,
+                      borderRadius: theme.borderRadius,
+                      padding: isMobile ? '22px 18px' : '32px 26px',
                       display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginBottom: 16,
-                      flexShrink: 0,
+                      flexDirection: 'column',
+                      cursor: isEditorMode ? 'grab' : 'pointer',
+                      transition: 'transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease',
+                      opacity: dragProps.isCurrentlyDragged ? 0.4 : 1,
                     }}
                   >
-                    {renderIcon(it.icon)}
-                  </div>
+                    {renderItemDraggerBadge(it)}
+                    <div
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 12,
+                        background: `${theme.primaryColor}18`,
+                        color: theme.primaryColor,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: 16,
+                        flexShrink: 0,
+                      }}
+                    >
+                      {renderIcon(it.icon)}
+                    </div>
 
                   {it.tag &&
                     eit(it.id, 'tag', it.tag, 'span', {
@@ -1644,7 +1772,8 @@ function renderSectionContent(p: SectionRendererParams) {
                     <ChevronRight size={16} color={theme.primaryColor} />
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           </div>
         </section>
@@ -1766,28 +1895,31 @@ function renderSectionContent(p: SectionRendererParams) {
                 gap: isMobile ? 20 : 28,
               }}
             >
-              {filteredItems.map((it) => (
-                <div
-                  key={it.id}
-                  onClick={() => {
-                    if (isEditorMode) {
-                      if (onSelectSection) onSelectSection(section.id);
-                    } else {
-                      onSelectItem(it);
-                    }
-                  }}
-                  style={{
-                    background: theme.bgColor,
-                    borderRadius: theme.borderRadius,
-                    overflow: 'hidden',
-                    border: `1px solid ${theme.borderColor}`,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  {it.image && (
+              {filteredItems.map((it, itemIdx) => {
+                const dragProps = getItemDragProps(it, itemIdx);
+                return (
+                  <div
+                    key={it.id}
+                    {...dragProps}
+                    style={{
+                      position: 'relative',
+                      background: theme.bgColor,
+                      borderRadius: theme.borderRadius,
+                      overflow: 'hidden',
+                      border: dragProps.isItemDragTarget
+                        ? `2px dashed ${theme.primaryColor}`
+                        : dragProps.isItemHovered
+                        ? `1px solid ${theme.primaryColor}88`
+                        : `1px solid ${theme.borderColor}`,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      cursor: isEditorMode ? 'grab' : 'pointer',
+                      transition: 'all 0.2s ease',
+                      opacity: dragProps.isCurrentlyDragged ? 0.4 : 1,
+                    }}
+                  >
+                    {renderItemDraggerBadge(it)}
+                    {it.image && (
                     <div style={{ height: isMobile ? 220 : 250, overflow: 'hidden', position: 'relative' }}>
                       <img
                         src={it.image}
@@ -1861,7 +1993,8 @@ function renderSectionContent(p: SectionRendererParams) {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           </div>
         </section>
@@ -1913,24 +2046,30 @@ function renderSectionContent(p: SectionRendererParams) {
                 gap: isMobile ? 18 : 28,
               }}
             >
-              {(section.items || []).map((it) => (
-                <div
-                  key={it.id}
-                  onClick={() => {
-                    if (isEditorMode && onSelectSection) {
-                      onSelectSection(section.id);
-                    }
-                  }}
-                  style={{
-                    background: theme.cardBg,
-                    border: `1px solid ${theme.borderColor}`,
-                    borderRadius: theme.borderRadius,
-                    padding: isMobile ? '22px 18px' : '32px 28px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'space-between',
-                  }}
-                >
+              {(section.items || []).map((it, itemIdx) => {
+                const dragProps = getItemDragProps(it, itemIdx);
+                return (
+                  <div
+                    key={it.id}
+                    {...dragProps}
+                    style={{
+                      position: 'relative',
+                      background: theme.cardBg,
+                      border: dragProps.isItemDragTarget
+                        ? `2px dashed ${theme.primaryColor}`
+                        : dragProps.isItemHovered
+                        ? `1px solid ${theme.primaryColor}88`
+                        : `1px solid ${theme.borderColor}`,
+                      borderRadius: theme.borderRadius,
+                      padding: isMobile ? '22px 18px' : '32px 28px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      cursor: isEditorMode ? 'grab' : 'default',
+                      opacity: dragProps.isCurrentlyDragged ? 0.4 : 1,
+                    }}
+                  >
+                    {renderItemDraggerBadge(it)}
                   <div>
                     <div style={{ color: '#eab308', display: 'flex', gap: 3, marginBottom: 14 }}>
                       {[...Array(it.stars || 5)].map((_, i) => (
@@ -1973,7 +2112,8 @@ function renderSectionContent(p: SectionRendererParams) {
                     </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           </div>
         </section>
@@ -2030,26 +2170,29 @@ function renderSectionContent(p: SectionRendererParams) {
                 gap: isMobile ? 18 : 28,
               }}
             >
-              {(section.items || []).map((it) => (
-                <div
-                  key={it.id}
-                  onClick={() => {
-                    if (isEditorMode && onSelectSection) {
-                      onSelectSection(section.id);
-                    } else {
-                      onSelectItem(it);
-                    }
-                  }}
-                  style={{
-                    background: theme.bgColor,
-                    borderRadius: theme.borderRadius,
-                    border: `1px solid ${theme.borderColor}`,
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    cursor: 'pointer',
-                  }}
-                >
+              {(section.items || []).map((it, itemIdx) => {
+                const dragProps = getItemDragProps(it, itemIdx);
+                return (
+                  <div
+                    key={it.id}
+                    {...dragProps}
+                    style={{
+                      position: 'relative',
+                      background: theme.bgColor,
+                      borderRadius: theme.borderRadius,
+                      border: dragProps.isItemDragTarget
+                        ? `2px dashed ${theme.primaryColor}`
+                        : dragProps.isItemHovered
+                        ? `1px solid ${theme.primaryColor}88`
+                        : `1px solid ${theme.borderColor}`,
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      cursor: isEditorMode ? 'grab' : 'pointer',
+                      opacity: dragProps.isCurrentlyDragged ? 0.4 : 1,
+                    }}
+                  >
+                    {renderItemDraggerBadge(it)}
                   {it.image && (
                     <div style={{ height: isMobile ? 240 : 260, overflow: 'hidden' }}>
                       <img
@@ -2081,7 +2224,8 @@ function renderSectionContent(p: SectionRendererParams) {
                       })}
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           </div>
         </section>
@@ -2138,32 +2282,38 @@ function renderSectionContent(p: SectionRendererParams) {
                 gap: isMobile ? 18 : 28,
               }}
             >
-              {(section.items || []).map((it) => {
+              {(section.items || []).map((it, itemIdx) => {
                 const isFeatured =
                   it.tag === 'RECOMMENDED' ||
                   it.tag === 'POPULAR' ||
                   it.tag === 'BEST VALUE' ||
                   it.tag === 'MOST POPULAR';
+                const dragProps = getItemDragProps(it, itemIdx);
 
                 return (
                   <div
                     key={it.id}
-                    onClick={() => {
-                      if (isEditorMode && onSelectSection) {
-                        onSelectSection(section.id);
-                      }
-                    }}
+                    {...dragProps}
                     style={{
                       background: theme.bgColor,
-                      border: isFeatured ? `2px solid ${theme.primaryColor}` : `1px solid ${theme.borderColor}`,
+                      border: dragProps.isItemDragTarget
+                        ? `2px dashed ${theme.primaryColor}`
+                        : isFeatured
+                        ? `2px solid ${theme.primaryColor}`
+                        : dragProps.isItemHovered
+                        ? `1px solid ${theme.primaryColor}88`
+                        : `1px solid ${theme.borderColor}`,
                       borderRadius: theme.borderRadius,
                       padding: isMobile ? '24px 20px' : '36px 28px',
                       boxShadow: isFeatured ? `0 14px 40px ${theme.primaryColor}26` : 'none',
                       display: 'flex',
                       flexDirection: 'column',
                       position: 'relative',
+                      cursor: isEditorMode ? 'grab' : 'default',
+                      opacity: dragProps.isCurrentlyDragged ? 0.4 : 1,
                     }}
                   >
+                    {renderItemDraggerBadge(it)}
                     {it.tag &&
                       eit(it.id, 'tag', it.tag, 'span', {
                         display: 'inline-block',
@@ -2256,27 +2406,38 @@ function renderSectionContent(p: SectionRendererParams) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {(section.items || []).map((faq) => {
+              {(section.items || []).map((faq, itemIdx) => {
                 const isOpen = isEditorMode ? true : expandedFaqId === faq.id;
+                const dragProps = getItemDragProps(faq, itemIdx);
                 return (
                   <div
                     key={faq.id}
+                    {...dragProps}
                     onClick={() => {
-                      if (isEditorMode && onSelectSection) {
-                        onSelectSection(section.id);
+                      if (isEditorMode) {
+                        if (onSelectSection) onSelectSection(section.id);
                       } else {
                         onToggleFaq(faq.id);
                       }
                     }}
                     style={{
+                      position: 'relative',
                       background: theme.cardBg,
-                      border: `1px solid ${isOpen ? theme.primaryColor : theme.borderColor}`,
+                      border: dragProps.isItemDragTarget
+                        ? `2px dashed ${theme.primaryColor}`
+                        : isOpen
+                        ? `1px solid ${theme.primaryColor}`
+                        : dragProps.isItemHovered
+                        ? `1px solid ${theme.primaryColor}88`
+                        : `1px solid ${theme.borderColor}`,
                       borderRadius: theme.borderRadius,
                       padding: isMobile ? '16px 18px' : '20px 24px',
-                      cursor: 'pointer',
+                      cursor: isEditorMode ? 'grab' : 'pointer',
                       transition: 'all 0.2s ease',
+                      opacity: dragProps.isCurrentlyDragged ? 0.4 : 1,
                     }}
                   >
+                    {renderItemDraggerBadge(faq)}
                     <div
                       style={{
                         display: 'flex',
@@ -2383,24 +2544,30 @@ function renderSectionContent(p: SectionRendererParams) {
 
               {/* Contact Details List */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                {(section.items || []).map((it) => (
-                  <div
-                    key={it.id}
-                    onClick={() => {
-                      if (isEditorMode && onSelectSection) {
-                        onSelectSection(section.id);
-                      }
-                    }}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'flex-start',
-                      gap: 14,
-                      padding: '12px 14px',
-                      background: theme.cardBg,
-                      borderRadius: theme.borderRadius,
-                      border: `1px solid ${theme.borderColor}`,
-                    }}
-                  >
+                {(section.items || []).map((it, itemIdx) => {
+                  const dragProps = getItemDragProps(it, itemIdx);
+                  return (
+                    <div
+                      key={it.id}
+                      {...dragProps}
+                      style={{
+                        position: 'relative',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 14,
+                        padding: '12px 14px',
+                        background: theme.cardBg,
+                        borderRadius: theme.borderRadius,
+                        border: dragProps.isItemDragTarget
+                          ? `2px dashed ${theme.primaryColor}`
+                          : dragProps.isItemHovered
+                          ? `1px solid ${theme.primaryColor}88`
+                          : `1px solid ${theme.borderColor}`,
+                        cursor: isEditorMode ? 'grab' : 'default',
+                        opacity: dragProps.isCurrentlyDragged ? 0.4 : 1,
+                      }}
+                    >
+                      {renderItemDraggerBadge(it)}
                     <div
                       style={{
                         color: theme.primaryColor,
@@ -2430,7 +2597,8 @@ function renderSectionContent(p: SectionRendererParams) {
                       })}
                     </div>
                   </div>
-                ))}
+                );
+              })}
               </div>
             </div>
 
