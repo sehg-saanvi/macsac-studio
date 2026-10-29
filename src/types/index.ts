@@ -69,6 +69,7 @@ export interface WebsiteSection {
     | 'luxury-stacked'
     | 'architect'
     | 'magazine-cover'
+    | 'blog'
     | 'swiss';
   title: string;
   subtitle?: string;
