@@ -44,6 +44,23 @@ interface WebsiteRendererProps {
     ctaText: string;
     ctaUrl: string;
     logoImage?: string;
+    tagline?: string;
+    layoutStyle?:
+      | 'standard'
+      | 'centered'
+      | 'floating'
+      | 'cinema'
+      | 'minimal'
+      | 'masthead'
+      | 'terminal'
+      | 'luxury-split'
+      | 'editorial'
+      | 'two-tier'
+      | 'brutalist';
+    announcement?: string;
+    secondaryInfo?: string;
+    statusBadge?: string;
+    metaText?: string;
   };
   footer: {
     brandName: string;
@@ -277,240 +294,1507 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
         overflowX: 'hidden',
       }}
     >
-      {/* 1. Website Header Navigation */}
-      <header
-        style={{
-          position: 'sticky',
-          top: 0,
-          zIndex: 40,
-          backgroundColor: theme.bgColor,
-          borderBottom: `1px solid ${theme.borderColor}`,
-          backdropFilter: 'blur(12px)',
-          transition: 'all 0.2s ease',
-          width: '100%',
-          boxSizing: 'border-box',
-        }}
-      >
-        <div
-          style={{
-            maxWidth: 1200,
-            margin: '0 auto',
-            padding: isMobile ? '10px 16px' : isTablet ? '10px 18px' : '16px 28px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            boxSizing: 'border-box',
-            minHeight: isTablet ? 54 : 56,
-            gap: isTablet ? 12 : 24,
-          }}
-        >
-          {/* Site Logo */}
-          <div
-            onClick={() => onNavigatePage('home')}
-            style={{
-              fontFamily: theme.headingFont,
-              fontWeight: 800,
-              fontSize: isMobile ? '1.02rem' : isTablet ? '1.08rem' : '1.3rem',
-              letterSpacing: '-0.02em',
-              cursor: 'pointer',
-              color: theme.textColor,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 8,
-              flexShrink: 0,
-              whiteSpace: 'nowrap',
-              maxWidth: isTablet ? 180 : 'none',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-            }}
-          >
-            {navigation.logoImage && (
-              <img
-                src={navigation.logoImage}
-                alt={navigation.logoText || projectName}
-                style={{ maxHeight: isMobile ? 24 : isTablet ? 26 : 34, maxWidth: 100, objectFit: 'contain', flexShrink: 0 }}
-              />
-            )}
-            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {navigation.logoText || projectName}
-            </span>
-          </div>
+      {/* 1. Website Header Navigation (Customized to each business) */}
+      {(() => {
+        const navStyle = navigation.layoutStyle || 'standard';
+        const contrastTextColor = getContrastTextColor(theme.primaryColor);
 
-          {/* Desktop Nav Links (full) & Tablet Nav Links (sleek compact pills) */}
-          <nav
-            style={{
-              display: isMobile ? 'none' : 'flex',
-              alignItems: 'center',
-              gap: isTablet ? 6 : 28,
-              justifyContent: 'center',
-              flexWrap: 'nowrap',
-              flex: 1,
-              maxWidth: isTablet ? 420 : 680,
-              overflow: 'hidden',
-            }}
-          >
-            {(isTablet && allPages.length > 2 ? allPages.slice(0, 2) : allPages).map((p) => {
-              const isActive = p.id === activePageId;
-              return (
+        // Helper: Shared Mobile/Tablet Menu Drawer
+        const renderMobileDrawer = () =>
+          mobileMenuOpen && (isMobile || isTablet) && (
+            <div
+              style={{
+                padding: '16px 20px',
+                backgroundColor: theme.cardBg,
+                borderBottom: `1px solid ${theme.borderColor}`,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 8,
+                boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
+                maxHeight: '65vh',
+                overflowY: 'auto',
+                pointerEvents: 'auto',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              {allPages.map((p) => {
+                const isActive = p.id === activePageId;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => {
+                      onNavigatePage(p.slug);
+                      setMobileMenuOpen(false);
+                    }}
+                    style={{
+                      textAlign: 'left',
+                      fontSize: '0.94rem',
+                      fontWeight: isActive ? 700 : 500,
+                      padding: '11px 14px',
+                      borderRadius: theme.borderRadius,
+                      backgroundColor: isActive ? `${theme.primaryColor}18` : 'transparent',
+                      color: isActive ? theme.primaryColor : theme.textColor,
+                      border: 'none',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <span>{p.name}</span>
+                    {isActive ? (
+                      <span
+                        style={{
+                          width: 8,
+                          height: 8,
+                          borderRadius: '50%',
+                          backgroundColor: theme.primaryColor,
+                        }}
+                      />
+                    ) : (
+                      <ChevronRight size={16} color={theme.textMuted} />
+                    )}
+                  </button>
+                );
+              })}
+
+              {navigation.ctaText && (
                 <button
-                  key={p.id}
-                  onClick={() => onNavigatePage(p.slug)}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleActionClick(navigation.ctaUrl, navigation.ctaText);
+                  }}
                   style={{
-                    fontSize: isTablet ? '0.78rem' : '0.94rem',
-                    fontWeight: isActive ? 700 : 500,
-                    color: isActive ? theme.primaryColor : theme.textMuted,
-                    backgroundColor: isTablet && isActive ? `${theme.primaryColor}14` : 'transparent',
-                    borderBottom: !isTablet && isActive ? `2px solid ${theme.primaryColor}` : '2px solid transparent',
-                    borderRadius: isTablet ? 6 : 0,
-                    padding: isTablet ? '5px 8px' : '4px 2px',
-                    transition: 'all 0.15s ease',
-                    borderTop: 'none',
-                    borderLeft: 'none',
-                    borderRight: 'none',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    lineHeight: 1,
+                    ...getButtonStyles(true),
+                    width: '100%',
+                    padding: '12px',
+                    fontSize: '0.92rem',
+                    marginTop: 10,
                   }}
                 >
-                  {p.name}
+                  {navigation.ctaText}
                 </button>
-              );
-            })}
+              )}
+            </div>
+          );
 
-            {/* Tablet "+ More" pill button if many pages */}
-            {isTablet && allPages.length > 2 && (
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                style={{
-                  fontSize: '0.76rem',
-                  fontWeight: 600,
-                  color: theme.primaryColor,
-                  background: `${theme.primaryColor}14`,
-                  border: `1px solid ${theme.primaryColor}33`,
-                  borderRadius: 6,
-                  padding: '4px 8px',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                +{allPages.length - 2} more
-              </button>
-            )}
-          </nav>
-
-          {/* Right Action & Tablet/Mobile Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: isTablet ? 8 : 12, flexShrink: 0 }}>
-            {navigation.ctaText && !isMobile && (
-              <button
-                onClick={() => handleActionClick(navigation.ctaUrl, navigation.ctaText)}
-                style={{
-                  ...getButtonStyles(true),
-                  padding: isTablet ? '6px 13px' : '10px 22px',
-                  fontSize: isTablet ? '0.78rem' : '0.9rem',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {navigation.ctaText}
-              </button>
-            )}
-
-            {/* Hamburger Toggle Button for Mobile and congested Tablet */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        // VARIANT 1: FLOATING ISLAND PILL NAVBAR (Modern Agency, SaaS, Product)
+        if (navStyle === 'floating') {
+          return (
+            <header
               style={{
-                display: isMobile || (isTablet && allPages.length > 4) ? 'flex' : 'none',
-                color: theme.textColor,
-                padding: isTablet ? '6px 8px' : '8px 10px',
-                background: theme.cardBg,
-                border: `1px solid ${theme.borderColor}`,
-                borderRadius: theme.borderRadius,
-                cursor: 'pointer',
-                alignItems: 'center',
-                justifyContent: 'center',
+                position: 'sticky',
+                top: isMobile ? 8 : 14,
+                zIndex: 50,
+                width: '100%',
+                padding: isMobile ? '0 12px' : '0 24px',
+                boxSizing: 'border-box',
+                pointerEvents: 'none',
               }}
-              aria-label="Toggle Navigation Menu"
             >
-              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
-            </button>
-          </div>
-        </div>
-
-        {/* Responsive Mobile & Tablet Drawer */}
-        {mobileMenuOpen && (isMobile || isTablet) && (
-          <div
-            style={{
-              padding: '16px 20px',
-              backgroundColor: theme.cardBg,
-              borderBottom: `1px solid ${theme.borderColor}`,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 8,
-              boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
-              maxHeight: '65vh',
-              overflowY: 'auto',
-            }}
-          >
-            {allPages.map((p) => {
-              const isActive = p.id === activePageId;
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => {
-                    onNavigatePage(p.slug);
-                    setMobileMenuOpen(false);
-                  }}
+              <div
+                style={{
+                  pointerEvents: 'auto',
+                  maxWidth: 1120,
+                  margin: '0 auto',
+                  background: theme.mode === 'dark' ? 'rgba(18, 18, 24, 0.88)' : 'rgba(255, 255, 255, 0.92)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  border: `1px solid ${theme.borderColor}`,
+                  borderRadius: 9999,
+                  boxShadow: '0 16px 36px rgba(0,0,0,0.12)',
+                  padding: isMobile ? '8px 14px' : '8px 20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  boxSizing: 'border-box',
+                  minHeight: 52,
+                }}
+              >
+                {/* Brand Logo with Live Pulse */}
+                <div
+                  onClick={() => onNavigatePage('home')}
                   style={{
-                    textAlign: 'left',
-                    fontSize: '0.94rem',
-                    fontWeight: isActive ? 700 : 500,
-                    padding: '11px 14px',
-                    borderRadius: theme.borderRadius,
-                    backgroundColor: isActive ? `${theme.primaryColor}18` : 'transparent',
-                    color: isActive ? theme.primaryColor : theme.textColor,
-                    border: 'none',
+                    fontFamily: theme.headingFont,
+                    fontWeight: 800,
+                    fontSize: isMobile ? '0.98rem' : '1.15rem',
+                    letterSpacing: '-0.02em',
                     cursor: 'pointer',
+                    color: theme.textColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    flexShrink: 0,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: '50%',
+                      background: theme.primaryColor,
+                      boxShadow: `0 0 10px ${theme.primaryColor}`,
+                      display: 'inline-block',
+                    }}
+                  />
+                  <span>{navigation.logoText || projectName}</span>
+                </div>
+
+                {/* Nav Links in Pill Capsule */}
+                <nav
+                  style={{
+                    display: isMobile ? 'none' : 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    background: theme.mode === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)',
+                    padding: '4px 6px',
+                    borderRadius: 9999,
+                    border: `1px solid ${theme.borderColor}`,
+                  }}
+                >
+                  {(isTablet && allPages.length > 2 ? allPages.slice(0, 2) : allPages).map((p) => {
+                    const isActive = p.id === activePageId;
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => onNavigatePage(p.slug)}
+                        style={{
+                          fontSize: isTablet ? '0.78rem' : '0.86rem',
+                          fontWeight: isActive ? 700 : 500,
+                          color: isActive ? contrastTextColor : theme.textMuted,
+                          backgroundColor: isActive ? theme.primaryColor : 'transparent',
+                          borderRadius: 9999,
+                          padding: isTablet ? '5px 12px' : '6px 16px',
+                          border: 'none',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.2s ease',
+                        }}
+                      >
+                        {p.name}
+                      </button>
+                    );
+                  })}
+                  {isTablet && allPages.length > 2 && (
+                    <button
+                      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                      style={{
+                        fontSize: '0.74rem',
+                        fontWeight: 600,
+                        color: theme.primaryColor,
+                        background: 'transparent',
+                        border: 'none',
+                        padding: '4px 8px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      +{allPages.length - 2}
+                    </button>
+                  )}
+                </nav>
+
+                {/* Right Action */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                  {navigation.ctaText && !isMobile && (
+                    <button
+                      onClick={() => handleActionClick(navigation.ctaUrl, navigation.ctaText)}
+                      style={{
+                        ...getButtonStyles(true),
+                        borderRadius: 9999,
+                        padding: isTablet ? '6px 16px' : '9px 22px',
+                        fontSize: isTablet ? '0.78rem' : '0.88rem',
+                        boxShadow: `0 4px 14px ${theme.primaryColor}40`,
+                      }}
+                    >
+                      {navigation.ctaText}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    style={{
+                      display: isMobile || (isTablet && allPages.length > 4) ? 'flex' : 'none',
+                      color: theme.textColor,
+                      padding: 6,
+                      background: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                    aria-label="Toggle Navigation"
+                  >
+                    {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+                  </button>
+                </div>
+              </div>
+              {renderMobileDrawer()}
+            </header>
+          );
+        }
+
+        // VARIANT 2: MASTHEAD (Artisan Bakery, Cafe, Coffee Roastery, Fine Dining)
+        if (navStyle === 'masthead') {
+          return (
+            <header
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 40,
+                backgroundColor: theme.bgColor,
+                borderBottom: `2px solid ${theme.borderColor}`,
+                backdropFilter: 'blur(12px)',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* Top Announcement / Operating Hours Ticker */}
+              <div
+                style={{
+                  background: theme.cardBg,
+                  borderBottom: `1px solid ${theme.borderColor}`,
+                  padding: '7px 16px',
+                  fontSize: '0.74rem',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: theme.primaryColor,
+                  fontWeight: 600,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 12,
+                  textAlign: 'center',
+                  fontFamily: theme.headingFont,
+                }}
+              >
+                <span>{navigation.announcement || '🥖 WOODFIRED HEARTH BAKES DAILY • 4:00 AM • 42 HERITAGE WAY • COUNTER PICKUPS'}</span>
+              </div>
+
+              {/* Main Centered Ornate Masthead */}
+              <div
+                style={{
+                  maxWidth: 1200,
+                  margin: '0 auto',
+                  padding: isMobile ? '12px 16px 8px' : '16px 28px 10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: isMobile ? 12 : 24,
+                }}
+              >
+                {!isMobile && (
+                  <span style={{ flex: 1, height: 1, background: theme.borderColor, maxWidth: 160 }} />
+                )}
+                <div
+                  onClick={() => onNavigatePage('home')}
+                  style={{
+                    fontFamily: theme.headingFont,
+                    fontWeight: 900,
+                    fontSize: isMobile ? '1.2rem' : isTablet ? '1.45rem' : '1.8rem',
+                    letterSpacing: '0.04em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    color: theme.textColor,
+                    textAlign: 'center',
+                    lineHeight: 1.1,
+                  }}
+                >
+                  {navigation.logoText || projectName}
+                </div>
+                {!isMobile && (
+                  <span style={{ flex: 1, height: 1, background: theme.borderColor, maxWidth: 160 }} />
+                )}
+              </div>
+
+              {/* Sub-Nav Row: Centered Navigation Links with Dot Dividers & CTA */}
+              <div
+                style={{
+                  borderTop: `1px solid ${theme.borderColor}`,
+                  background: theme.bgColor,
+                  padding: isMobile ? '8px 16px' : '8px 24px',
+                }}
+              >
+                <div
+                  style={{
+                    maxWidth: 1000,
+                    margin: '0 auto',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
                   }}
                 >
-                  <span>{p.name}</span>
-                  {isActive ? (
-                    <span
-                      style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: '50%',
-                        backgroundColor: theme.primaryColor,
-                      }}
-                    />
-                  ) : (
-                    <ChevronRight size={16} color={theme.textMuted} />
-                  )}
-                </button>
-              );
-            })}
+                  <nav
+                    style={{
+                      display: isMobile ? 'none' : 'flex',
+                      alignItems: 'center',
+                      gap: 18,
+                      flex: 1,
+                      justifyContent: 'center',
+                    }}
+                  >
+                    {(isTablet && allPages.length > 3 ? allPages.slice(0, 3) : allPages).map((p, idx) => {
+                      const isActive = p.id === activePageId;
+                      return (
+                        <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+                          {idx > 0 && <span style={{ color: theme.borderColor, fontSize: '0.7rem' }}>✦</span>}
+                          <button
+                            onClick={() => onNavigatePage(p.slug)}
+                            style={{
+                              fontSize: isTablet ? '0.78rem' : '0.88rem',
+                              fontWeight: isActive ? 700 : 500,
+                              color: isActive ? theme.primaryColor : theme.textMuted,
+                              background: 'transparent',
+                              border: 'none',
+                              borderBottom: isActive ? `2px solid ${theme.primaryColor}` : '2px solid transparent',
+                              padding: '4px 2px',
+                              cursor: 'pointer',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.06em',
+                              transition: 'all 0.15s ease',
+                            }}
+                          >
+                            {p.name}
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </nav>
 
-            {navigation.ctaText && (
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  handleActionClick(navigation.ctaUrl, navigation.ctaText);
-                }}
+                  {/* Right Action Button */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: isMobile ? 'auto' : 0 }}>
+                    {navigation.ctaText && !isMobile && (
+                      <button
+                        onClick={() => handleActionClick(navigation.ctaUrl, navigation.ctaText)}
+                        style={{
+                          ...getButtonStyles(true),
+                          padding: '7px 18px',
+                          fontSize: '0.82rem',
+                          borderRadius: 9999,
+                          letterSpacing: '0.04em',
+                          textTransform: 'uppercase',
+                          fontWeight: 700,
+                        }}
+                      >
+                        {navigation.ctaText}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                      style={{
+                        display: isMobile ? 'flex' : 'none',
+                        color: theme.textColor,
+                        padding: '6px 10px',
+                        background: theme.cardBg,
+                        border: `1px solid ${theme.borderColor}`,
+                        borderRadius: 6,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+              {renderMobileDrawer()}
+            </header>
+          );
+        }
+
+        // VARIANT 3: TERMINAL / DEVELOPER (Tech, AI, Cloud Infra, Cyber)
+        if (navStyle === 'terminal') {
+          return (
+            <header
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 40,
+                backgroundColor: '#0a0d14',
+                borderBottom: '1px solid #1e2638',
+                backdropFilter: 'blur(12px)',
+                fontFamily: "'JetBrains Mono', 'Fira Code', 'SF Mono', monospace",
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              <div
                 style={{
-                  ...getButtonStyles(true),
-                  width: '100%',
-                  padding: '12px',
-                  fontSize: '0.92rem',
-                  marginTop: 10,
+                  maxWidth: 1200,
+                  margin: '0 auto',
+                  padding: isMobile ? '10px 14px' : '10px 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 16,
                 }}
               >
-                {navigation.ctaText}
-              </button>
-            )}
-          </div>
-        )}
-      </header>
+                {/* Terminal Prompt Brand */}
+                <div
+                  onClick={() => onNavigatePage('home')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                    cursor: 'pointer',
+                    color: '#e2e8f0',
+                    fontSize: isMobile ? '0.86rem' : '0.94rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  <span style={{ color: theme.primaryColor }}>$</span>
+                  <span>{navigation.brandName?.toLowerCase() || 'sys'}</span>
+                  <span
+                    style={{
+                      background: 'rgba(0, 229, 255, 0.1)',
+                      color: theme.primaryColor || '#00e5ff',
+                      border: `1px solid ${theme.primaryColor}44`,
+                      borderRadius: 4,
+                      padding: '2px 7px',
+                      fontSize: '0.68rem',
+                      fontWeight: 600,
+                      display: isMobile ? 'none' : 'inline-block',
+                    }}
+                  >
+                    {navigation.statusBadge || '● LIVE v2.4'}
+                  </span>
+                  <span style={{ color: '#64748b', fontSize: '0.72rem', display: isMobile ? 'none' : 'inline-block' }}>
+                    git:(main)
+                  </span>
+                </div>
+
+                {/* Monospace Terminal Bracket Links */}
+                <nav
+                  style={{
+                    display: isMobile ? 'none' : 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                  }}
+                >
+                  {(isTablet && allPages.length > 2 ? allPages.slice(0, 2) : allPages).map((p, idx) => {
+                    const isActive = p.id === activePageId;
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => onNavigatePage(p.slug)}
+                        style={{
+                          fontFamily: 'inherit',
+                          fontSize: isTablet ? '0.76rem' : '0.82rem',
+                          fontWeight: isActive ? 700 : 500,
+                          color: isActive ? theme.primaryColor : '#94a3b8',
+                          background: isActive ? `${theme.primaryColor}14` : 'transparent',
+                          border: isActive ? `1px solid ${theme.primaryColor}55` : '1px solid transparent',
+                          borderRadius: 4,
+                          padding: '4px 10px',
+                          cursor: 'pointer',
+                          whiteSpace: 'nowrap',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        [{String(idx + 1).padStart(2, '0')}/{p.name.toUpperCase()}]
+                      </button>
+                    );
+                  })}
+                  {isTablet && allPages.length > 2 && (
+                    <button
+                      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                      style={{
+                        fontFamily: 'inherit',
+                        fontSize: '0.74rem',
+                        color: theme.primaryColor,
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      +{allPages.length - 2}
+                    </button>
+                  )}
+                </nav>
+
+                {/* Telemetry Ping & Terminal Button */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                  {!isMobile && (
+                    <span
+                      style={{
+                        color: '#22c55e',
+                        fontSize: '0.72rem',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 5,
+                        background: 'rgba(34,197,94,0.1)',
+                        padding: '3px 8px',
+                        borderRadius: 4,
+                        border: '1px solid rgba(34,197,94,0.25)',
+                      }}
+                    >
+                      ⚡ 12ms TTFT
+                    </span>
+                  )}
+                  {navigation.ctaText && !isMobile && (
+                    <button
+                      onClick={() => handleActionClick(navigation.ctaUrl, navigation.ctaText)}
+                      style={{
+                        ...getButtonStyles(true),
+                        fontFamily: 'inherit',
+                        padding: '6px 14px',
+                        fontSize: '0.8rem',
+                        borderRadius: 4,
+                      }}
+                    >
+                      {navigation.ctaText}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    style={{
+                      display: isMobile ? 'flex' : 'none',
+                      color: '#e2e8f0',
+                      padding: 6,
+                      background: '#161d2d',
+                      border: '1px solid #1e2638',
+                      borderRadius: 4,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                  </button>
+                </div>
+              </div>
+              {renderMobileDrawer()}
+            </header>
+          );
+        }
+
+        // VARIANT 4: LUXURY SPLIT (High Fashion, Jewelry, Haute Horlogerie, Perfumery)
+        if (navStyle === 'luxury-split') {
+          return (
+            <header
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 40,
+                backgroundColor: theme.bgColor,
+                borderBottom: `1px solid ${theme.borderColor}`,
+                backdropFilter: 'blur(12px)',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* Top White-Glove Shipping Bar */}
+              <div
+                style={{
+                  background: theme.mode === 'dark' ? '#0a0a0c' : '#f5f3ef',
+                  borderBottom: `1px solid ${theme.borderColor}`,
+                  padding: '5px 16px',
+                  fontSize: '0.68rem',
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  color: theme.textMuted,
+                  textAlign: 'center',
+                }}
+              >
+                <span>{navigation.announcement || 'COMPLIMENTARY WHITE-GLOVE COURIER ON ORDERS OVER $300 • CURRENCY: USD ($)'}</span>
+              </div>
+
+              {/* 3-Column Split Main Row */}
+              <div
+                style={{
+                  maxWidth: 1300,
+                  margin: '0 auto',
+                  padding: isMobile ? '12px 16px' : '16px 32px',
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr auto' : '1fr auto 1fr',
+                  alignItems: 'center',
+                  gap: 16,
+                }}
+              >
+                {/* Left: Luxury Category Links */}
+                <nav
+                  style={{
+                    display: isMobile ? 'none' : 'flex',
+                    alignItems: 'center',
+                    gap: 18,
+                  }}
+                >
+                  {(isTablet && allPages.length > 2 ? allPages.slice(0, 2) : allPages).map((p) => {
+                    const isActive = p.id === activePageId;
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => onNavigatePage(p.slug)}
+                        style={{
+                          fontSize: '0.78rem',
+                          fontWeight: isActive ? 700 : 500,
+                          color: isActive ? theme.primaryColor : theme.textMuted,
+                          background: 'transparent',
+                          border: 'none',
+                          borderBottom: isActive ? `1px solid ${theme.primaryColor}` : '1px solid transparent',
+                          padding: '4px 0',
+                          letterSpacing: '0.14em',
+                          textTransform: 'uppercase',
+                          cursor: 'pointer',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        {p.name}
+                      </button>
+                    );
+                  })}
+                  {isTablet && allPages.length > 2 && (
+                    <button
+                      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                      style={{
+                        fontSize: '0.74rem',
+                        color: theme.primaryColor,
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      +{allPages.length - 2}
+                    </button>
+                  )}
+                </nav>
+
+                {/* Center: High-Fashion Centered Brand Mark */}
+                <div
+                  onClick={() => onNavigatePage('home')}
+                  style={{
+                    fontFamily: theme.headingFont,
+                    fontWeight: 700,
+                    fontSize: isMobile ? '1.15rem' : '1.45rem',
+                    letterSpacing: '0.24em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    color: theme.textColor,
+                    textAlign: isMobile ? 'left' : 'center',
+                  }}
+                >
+                  {navigation.logoText || projectName}
+                </div>
+
+                {/* Right: Atelier Utilities & Action */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 16,
+                    justifyContent: 'flex-end',
+                  }}
+                >
+                  {!isMobile && (
+                    <div style={{ display: 'flex', gap: 14, fontSize: '0.74rem', letterSpacing: '0.12em', color: theme.textMuted, textTransform: 'uppercase' }}>
+                      <span style={{ cursor: 'pointer' }}>SEARCH</span>
+                      <span style={{ cursor: 'pointer' }}>BAG (0)</span>
+                    </div>
+                  )}
+                  {navigation.ctaText && !isMobile && (
+                    <button
+                      onClick={() => handleActionClick(navigation.ctaUrl, navigation.ctaText)}
+                      style={{
+                        ...getButtonStyles(true),
+                        padding: '8px 18px',
+                        fontSize: '0.78rem',
+                        letterSpacing: '0.12em',
+                        textTransform: 'uppercase',
+                        borderRadius: 0,
+                      }}
+                    >
+                      {navigation.ctaText}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    style={{
+                      display: isMobile ? 'flex' : 'none',
+                      color: theme.textColor,
+                      padding: 6,
+                      background: 'transparent',
+                      border: `1px solid ${theme.borderColor}`,
+                      borderRadius: 4,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                  </button>
+                </div>
+              </div>
+              {renderMobileDrawer()}
+            </header>
+          );
+        }
+
+        // VARIANT 5: EDITORIAL / SWISS GAZETTE (Monograph, Critical Journal, Publishing)
+        if (navStyle === 'editorial') {
+          return (
+            <header
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 40,
+                backgroundColor: theme.bgColor,
+                borderBottom: `2px solid ${theme.textColor}`,
+                backdropFilter: 'blur(12px)',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* Publication Top Ruled Metadata */}
+              <div
+                style={{
+                  borderBottom: `1px solid ${theme.borderColor}`,
+                  padding: '5px 20px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  fontSize: '0.72rem',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                  color: theme.textMuted,
+                  fontFamily: theme.headingFont,
+                }}
+              >
+                <span>{navigation.metaText || 'VOL. 26 // ISSUE NO. 04'}</span>
+                <span>ZÜRICH — TOKYO</span>
+                <span style={{ display: isMobile ? 'none' : 'inline' }}>CIRCULATION: 14,200</span>
+                <span>OCTOBER 2026</span>
+              </div>
+
+              {/* Main Gazette Row */}
+              <div
+                style={{
+                  maxWidth: 1280,
+                  margin: '0 auto',
+                  padding: isMobile ? '12px 16px' : '14px 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 20,
+                }}
+              >
+                <div
+                  onClick={() => onNavigatePage('home')}
+                  style={{
+                    fontFamily: theme.headingFont,
+                    fontWeight: 900,
+                    fontSize: isMobile ? '1.15rem' : '1.5rem',
+                    letterSpacing: '-0.03em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    color: theme.textColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                  }}
+                >
+                  <span>{navigation.logoText || projectName}</span>
+                  <span
+                    style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 700,
+                      padding: '2px 6px',
+                      background: theme.textColor,
+                      color: theme.bgColor,
+                      borderRadius: 2,
+                    }}
+                  >
+                    MONOGRAPH
+                  </span>
+                </div>
+
+                {/* Swiss Numbered Nav Links */}
+                <nav
+                  style={{
+                    display: isMobile ? 'none' : 'flex',
+                    alignItems: 'center',
+                    gap: 16,
+                  }}
+                >
+                  {(isTablet && allPages.length > 2 ? allPages.slice(0, 2) : allPages).map((p, idx) => {
+                    const isActive = p.id === activePageId;
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => onNavigatePage(p.slug)}
+                        style={{
+                          fontSize: isTablet ? '0.76rem' : '0.84rem',
+                          fontWeight: isActive ? 800 : 600,
+                          color: isActive ? theme.textColor : theme.textMuted,
+                          background: 'transparent',
+                          border: 'none',
+                          borderBottom: isActive ? `2px solid ${theme.textColor}` : '2px solid transparent',
+                          padding: '4px 0',
+                          cursor: 'pointer',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                        }}
+                      >
+                        {String(idx + 1).padStart(2, '0')}/ {p.name}
+                      </button>
+                    );
+                  })}
+                  {isTablet && allPages.length > 2 && (
+                    <button
+                      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                      style={{
+                        fontSize: '0.74rem',
+                        fontWeight: 700,
+                        color: theme.textColor,
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      +{allPages.length - 2}
+                    </button>
+                  )}
+                </nav>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  {navigation.ctaText && !isMobile && (
+                    <button
+                      onClick={() => handleActionClick(navigation.ctaUrl, navigation.ctaText)}
+                      style={{
+                        background: theme.textColor,
+                        color: theme.bgColor,
+                        border: `1px solid ${theme.textColor}`,
+                        padding: '8px 16px',
+                        fontSize: '0.8rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.06em',
+                        borderRadius: 0,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {navigation.ctaText}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    style={{
+                      display: isMobile ? 'flex' : 'none',
+                      color: theme.textColor,
+                      padding: 6,
+                      background: 'transparent',
+                      border: `1px solid ${theme.textColor}`,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                  </button>
+                </div>
+              </div>
+              {renderMobileDrawer()}
+            </header>
+          );
+        }
+
+        // VARIANT 6: TWO-TIER CLINICAL / PROFESSIONAL (Medical, Dental, Legal, Wealth)
+        if (navStyle === 'two-tier') {
+          return (
+            <header
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 40,
+                backgroundColor: theme.bgColor,
+                borderBottom: `1px solid ${theme.borderColor}`,
+                backdropFilter: 'blur(12px)',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* Top Contact & Hours Utility Tier */}
+              <div
+                style={{
+                  background: theme.cardBg,
+                  borderBottom: `1px solid ${theme.borderColor}`,
+                  padding: '5px 24px',
+                  fontSize: '0.74rem',
+                  color: theme.textMuted,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                  <span>{navigation.secondaryInfo || '📞 (555) 839-2041 • Mon–Fri: 8am–6pm'}</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                  <span style={{ display: isMobile ? 'none' : 'inline' }}>📍 450 Lexington Ave, Suite 1200</span>
+                  <span style={{ color: theme.primaryColor, fontWeight: 600, cursor: 'pointer' }}>Client Portal ↗</span>
+                </div>
+              </div>
+
+              {/* Main Medical/Legal Row */}
+              <div
+                style={{
+                  maxWidth: 1200,
+                  margin: '0 auto',
+                  padding: isMobile ? '10px 16px' : '12px 28px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 20,
+                }}
+              >
+                <div
+                  onClick={() => onNavigatePage('home')}
+                  style={{
+                    fontFamily: theme.headingFont,
+                    fontWeight: 800,
+                    fontSize: isMobile ? '1.05rem' : '1.3rem',
+                    letterSpacing: '-0.02em',
+                    cursor: 'pointer',
+                    color: theme.textColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 10,
+                  }}
+                >
+                  <span
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 6,
+                      background: theme.primaryColor,
+                      color: contrastTextColor,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 900,
+                      fontSize: '0.9rem',
+                    }}
+                  >
+                    +
+                  </span>
+                  <span>{navigation.logoText || projectName}</span>
+                </div>
+
+                <nav
+                  style={{
+                    display: isMobile ? 'none' : 'flex',
+                    alignItems: 'center',
+                    gap: 20,
+                  }}
+                >
+                  {(isTablet && allPages.length > 2 ? allPages.slice(0, 2) : allPages).map((p) => {
+                    const isActive = p.id === activePageId;
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => onNavigatePage(p.slug)}
+                        style={{
+                          fontSize: '0.88rem',
+                          fontWeight: isActive ? 700 : 500,
+                          color: isActive ? theme.primaryColor : theme.textMuted,
+                          background: 'transparent',
+                          border: 'none',
+                          borderBottom: isActive ? `2px solid ${theme.primaryColor}` : '2px solid transparent',
+                          padding: '4px 2px',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {p.name}
+                      </button>
+                    );
+                  })}
+                  {isTablet && allPages.length > 2 && (
+                    <button
+                      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                      style={{
+                        fontSize: '0.74rem',
+                        color: theme.primaryColor,
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      +{allPages.length - 2}
+                    </button>
+                  )}
+                </nav>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {navigation.ctaText && !isMobile && (
+                    <button
+                      onClick={() => handleActionClick(navigation.ctaUrl, navigation.ctaText)}
+                      style={{
+                        ...getButtonStyles(true),
+                        padding: '9px 20px',
+                        fontSize: '0.86rem',
+                        borderRadius: theme.borderRadius,
+                      }}
+                    >
+                      {navigation.ctaText}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    style={{
+                      display: isMobile ? 'flex' : 'none',
+                      color: theme.textColor,
+                      padding: 8,
+                      background: theme.cardBg,
+                      border: `1px solid ${theme.borderColor}`,
+                      borderRadius: 6,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                  </button>
+                </div>
+              </div>
+              {renderMobileDrawer()}
+            </header>
+          );
+        }
+
+        // VARIANT 7: MINIMALIST (Coordinates & Project Index)
+        if (navStyle === 'minimal') {
+          return (
+            <header
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 40,
+                backgroundColor: theme.bgColor,
+                borderBottom: `1px solid ${theme.borderColor}`,
+                backdropFilter: 'blur(12px)',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              <div
+                style={{
+                  maxWidth: 1300,
+                  margin: '0 auto',
+                  padding: isMobile ? '12px 16px' : '14px 32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div
+                  onClick={() => onNavigatePage('home')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 16,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <span
+                    style={{
+                      fontFamily: theme.headingFont,
+                      fontWeight: 800,
+                      fontSize: isMobile ? '1.02rem' : '1.18rem',
+                      letterSpacing: '-0.01em',
+                      color: theme.textColor,
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    {navigation.logoText || projectName}
+                  </span>
+                  {!isMobile && (
+                    <span style={{ fontSize: '0.74rem', color: theme.textMuted, fontFamily: 'monospace' }}>
+                      {navigation.metaText || "34°12'N 118°14'W • INDEX [14]"}
+                    </span>
+                  )}
+                </div>
+
+                <nav style={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: 20 }}>
+                  {(isTablet && allPages.length > 2 ? allPages.slice(0, 2) : allPages).map((p) => {
+                    const isActive = p.id === activePageId;
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => onNavigatePage(p.slug)}
+                        style={{
+                          fontSize: '0.84rem',
+                          fontWeight: isActive ? 700 : 400,
+                          color: isActive ? theme.textColor : theme.textMuted,
+                          background: 'transparent',
+                          border: 'none',
+                          borderBottom: isActive ? `1px solid ${theme.textColor}` : '1px solid transparent',
+                          padding: '2px 0',
+                          cursor: 'pointer',
+                          textTransform: 'lowercase',
+                        }}
+                      >
+                        /{p.name.toLowerCase()}
+                      </button>
+                    );
+                  })}
+                  {isTablet && allPages.length > 2 && (
+                    <button
+                      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                      style={{
+                        fontSize: '0.74rem',
+                        color: theme.textColor,
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      +{allPages.length - 2}
+                    </button>
+                  )}
+                </nav>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  {navigation.ctaText && !isMobile && (
+                    <button
+                      onClick={() => handleActionClick(navigation.ctaUrl, navigation.ctaText)}
+                      style={{
+                        background: 'transparent',
+                        color: theme.textColor,
+                        border: `1px solid ${theme.borderColor}`,
+                        padding: '6px 16px',
+                        fontSize: '0.8rem',
+                        cursor: 'pointer',
+                        borderRadius: 4,
+                      }}
+                    >
+                      {navigation.ctaText} →
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    style={{
+                      display: isMobile ? 'flex' : 'none',
+                      color: theme.textColor,
+                      padding: 6,
+                      background: 'transparent',
+                      border: `1px solid ${theme.borderColor}`,
+                      borderRadius: 4,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                  </button>
+                </div>
+              </div>
+              {renderMobileDrawer()}
+            </header>
+          );
+        }
+
+        // VARIANT 8: BRUTALIST (Festival, Nightlife, High-Energy Event, Launch)
+        if (navStyle === 'brutalist') {
+          return (
+            <header
+              style={{
+                position: 'sticky',
+                top: 0,
+                zIndex: 40,
+                backgroundColor: theme.bgColor,
+                borderBottom: `3px solid ${theme.textColor}`,
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
+              {/* Event Ticker */}
+              <div
+                style={{
+                  background: theme.textColor,
+                  color: theme.bgColor,
+                  padding: '5px 16px',
+                  fontSize: '0.72rem',
+                  fontWeight: 900,
+                  letterSpacing: '0.12em',
+                  textTransform: 'uppercase',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}
+              >
+                <span>{navigation.announcement || '⚡ OCTOBER 24–26 • 84% OF TICKET TIERS RESERVED'}</span>
+                <span style={{ display: isMobile ? 'none' : 'inline' }}>LIVE STAGES // 36 ARTISTS</span>
+              </div>
+
+              <div
+                style={{
+                  maxWidth: 1300,
+                  margin: '0 auto',
+                  padding: isMobile ? '10px 14px' : '12px 24px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  gap: 16,
+                }}
+              >
+                <div
+                  onClick={() => onNavigatePage('home')}
+                  style={{
+                    fontFamily: theme.headingFont,
+                    fontWeight: 900,
+                    fontSize: isMobile ? '1.15rem' : '1.45rem',
+                    letterSpacing: '-0.02em',
+                    textTransform: 'uppercase',
+                    cursor: 'pointer',
+                    color: theme.textColor,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                  }}
+                >
+                  <span>{navigation.logoText || projectName}</span>
+                  <span
+                    style={{
+                      background: theme.primaryColor,
+                      color: contrastTextColor,
+                      padding: '2px 8px',
+                      fontSize: '0.7rem',
+                      fontWeight: 900,
+                      border: `2px solid ${theme.textColor}`,
+                    }}
+                  >
+                    2026
+                  </span>
+                </div>
+
+                <nav style={{ display: isMobile ? 'none' : 'flex', alignItems: 'center', gap: 14 }}>
+                  {(isTablet && allPages.length > 2 ? allPages.slice(0, 2) : allPages).map((p) => {
+                    const isActive = p.id === activePageId;
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => onNavigatePage(p.slug)}
+                        style={{
+                          fontSize: '0.82rem',
+                          fontWeight: 900,
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.04em',
+                          color: theme.textColor,
+                          backgroundColor: isActive ? theme.primaryColor : 'transparent',
+                          border: `2px solid ${theme.textColor}`,
+                          boxShadow: isActive ? `3px 3px 0px ${theme.textColor}` : 'none',
+                          padding: '5px 12px',
+                          cursor: 'pointer',
+                          transition: 'all 0.1s ease',
+                        }}
+                      >
+                        {p.name}
+                      </button>
+                    );
+                  })}
+                  {isTablet && allPages.length > 2 && (
+                    <button
+                      onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                      style={{
+                        fontSize: '0.74rem',
+                        fontWeight: 900,
+                        color: theme.textColor,
+                        background: 'transparent',
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      +{allPages.length - 2}
+                    </button>
+                  )}
+                </nav>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {navigation.ctaText && !isMobile && (
+                    <button
+                      onClick={() => handleActionClick(navigation.ctaUrl, navigation.ctaText)}
+                      style={{
+                        background: theme.primaryColor,
+                        color: contrastTextColor,
+                        border: `2px solid ${theme.textColor}`,
+                        boxShadow: `3px 3px 0px ${theme.textColor}`,
+                        padding: '8px 18px',
+                        fontSize: '0.84rem',
+                        fontWeight: 900,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.04em',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {navigation.ctaText}
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    style={{
+                      display: isMobile ? 'flex' : 'none',
+                      color: theme.textColor,
+                      padding: 6,
+                      background: theme.cardBg,
+                      border: `2px solid ${theme.textColor}`,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                  </button>
+                </div>
+              </div>
+              {renderMobileDrawer()}
+            </header>
+          );
+        }
+
+        // VARIANT 9: STANDARD (Clean fallback)
+        return (
+          <header
+            style={{
+              position: 'sticky',
+              top: 0,
+              zIndex: 40,
+              backgroundColor: theme.bgColor,
+              borderBottom: `1px solid ${theme.borderColor}`,
+              backdropFilter: 'blur(12px)',
+              transition: 'all 0.2s ease',
+              width: '100%',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div
+              style={{
+                maxWidth: 1200,
+                margin: '0 auto',
+                padding: isMobile ? '10px 16px' : isTablet ? '10px 18px' : '16px 28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                boxSizing: 'border-box',
+                minHeight: isTablet ? 54 : 56,
+                gap: isTablet ? 12 : 24,
+              }}
+            >
+              {/* Site Logo */}
+              <div
+                onClick={() => onNavigatePage('home')}
+                style={{
+                  fontFamily: theme.headingFont,
+                  fontWeight: 800,
+                  fontSize: isMobile ? '1.02rem' : isTablet ? '1.08rem' : '1.3rem',
+                  letterSpacing: '-0.02em',
+                  cursor: 'pointer',
+                  color: theme.textColor,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                  maxWidth: isTablet ? 180 : 'none',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}
+              >
+                {navigation.logoImage && (
+                  <img
+                    src={navigation.logoImage}
+                    alt={navigation.logoText || projectName}
+                    style={{ maxHeight: isMobile ? 24 : isTablet ? 26 : 34, maxWidth: 100, objectFit: 'contain', flexShrink: 0 }}
+                  />
+                )}
+                <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {navigation.logoText || projectName}
+                </span>
+              </div>
+
+              {/* Desktop Nav Links (full) & Tablet Nav Links */}
+              <nav
+                style={{
+                  display: isMobile ? 'none' : 'flex',
+                  alignItems: 'center',
+                  gap: isTablet ? 6 : 28,
+                  justifyContent: 'center',
+                  flexWrap: 'nowrap',
+                  flex: 1,
+                  maxWidth: isTablet ? 420 : 680,
+                  overflow: 'hidden',
+                }}
+              >
+                {(isTablet && allPages.length > 2 ? allPages.slice(0, 2) : allPages).map((p) => {
+                  const isActive = p.id === activePageId;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => onNavigatePage(p.slug)}
+                      style={{
+                        fontSize: isTablet ? '0.78rem' : '0.94rem',
+                        fontWeight: isActive ? 700 : 500,
+                        color: isActive ? theme.primaryColor : theme.textMuted,
+                        backgroundColor: isTablet && isActive ? `${theme.primaryColor}14` : 'transparent',
+                        borderBottom: !isTablet && isActive ? `2px solid ${theme.primaryColor}` : '2px solid transparent',
+                        borderRadius: isTablet ? 6 : 0,
+                        padding: isTablet ? '5px 8px' : '4px 2px',
+                        transition: 'all 0.15s ease',
+                        borderTop: 'none',
+                        borderLeft: 'none',
+                        borderRight: 'none',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        lineHeight: 1,
+                      }}
+                    >
+                      {p.name}
+                    </button>
+                  );
+                })}
+
+                {isTablet && allPages.length > 2 && (
+                  <button
+                    onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                    style={{
+                      fontSize: '0.76rem',
+                      fontWeight: 600,
+                      color: theme.primaryColor,
+                      background: `${theme.primaryColor}14`,
+                      border: `1px solid ${theme.primaryColor}33`,
+                      borderRadius: 6,
+                      padding: '4px 8px',
+                      cursor: 'pointer',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    +{allPages.length - 2} more
+                  </button>
+                )}
+              </nav>
+
+              {/* Right Action & Tablet/Mobile Toggle */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: isTablet ? 8 : 12, flexShrink: 0 }}>
+                {navigation.ctaText && !isMobile && (
+                  <button
+                    onClick={() => handleActionClick(navigation.ctaUrl, navigation.ctaText)}
+                    style={{
+                      ...getButtonStyles(true),
+                      padding: isTablet ? '6px 13px' : '10px 22px',
+                      fontSize: isTablet ? '0.78rem' : '0.9rem',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {navigation.ctaText}
+                  </button>
+                )}
+
+                <button
+                  onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                  style={{
+                    display: isMobile || (isTablet && allPages.length > 4) ? 'flex' : 'none',
+                    color: theme.textColor,
+                    padding: isTablet ? '6px 8px' : '8px 10px',
+                    background: theme.cardBg,
+                    border: `1px solid ${theme.borderColor}`,
+                    borderRadius: theme.borderRadius,
+                    cursor: 'pointer',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  aria-label="Toggle Navigation Menu"
+                >
+                  {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+                </button>
+              </div>
+            </div>
+            {renderMobileDrawer()}
+          </header>
+        );
+      })()}
 
       {/* 2. Main Page Content */}
       <main style={{ flex: 1, width: '100%', boxSizing: 'border-box' }}>

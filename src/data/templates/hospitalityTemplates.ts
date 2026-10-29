@@ -38,7 +38,9 @@ export const hospitalityTemplates: WebsiteTemplate[] = [
     },
     navigation: {
       brandName: 'ARTISAN & CO.',
-      logoText: 'ARTISAN & CO. BAKEHOUSE',
+      logoText: 'ARTISAN & CO. SOURDOUGH BAKEHOUSE',
+      layoutStyle: 'masthead',
+      announcement: '🥖 WOODFIRED HEARTH BAKES DAILY • 4:00 AM • 42 HERITAGE WAY • COUNTER PICKUPS',
       links: [
         { id: 'ab-nav-1', label: 'Bakehouse', pageSlug: 'home' },
         { id: 'ab-nav-2', label: 'Daily Bakes & Menu', pageSlug: 'menu' },
@@ -330,7 +332,8 @@ export const hospitalityTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'GRAND HORIZON',
       logoText: 'THE GRAND HORIZON RESORT',
-      layoutStyle: 'cinema',
+      layoutStyle: 'luxury-split',
+      announcement: '🌊 CLIFFSIDE VILLAS OVERLOOKING THE AMALFI COAST • PRIVATE HELIPAD TRANSFERS',
       links: [
         { id: 'gh-nav-1', label: 'The Resort', pageSlug: 'home' },
         { id: 'gh-nav-2', label: 'Suites & Villas', pageSlug: 'villas' },
@@ -603,6 +606,8 @@ export const hospitalityTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'KOMOREBI',
       logoText: 'KOMOREBI COFFEE // 木漏れ日',
+      layoutStyle: 'minimal',
+      metaText: "35°39'N 139°44'E • SHIBUYA ROASTERY",
       links: [
         { id: 'kc-nav-1', label: 'Roastery', pageSlug: 'home' },
         { id: 'kc-nav-2', label: 'Single-Origin Shop', pageSlug: 'shop' },

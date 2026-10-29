@@ -39,7 +39,8 @@ export const realEstateTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'AURA ESTATES',
       logoText: 'AURA // PRIVATE RESIDENCES',
-      layoutStyle: 'cinema',
+      layoutStyle: 'two-tier',
+      secondaryInfo: 'DISCREET REAL ESTATE BROKERAGE • LONDON • ZÜRICH • NEW YORK • DUBAI • DESK: +44 20 7946 0920',
       links: [
         { id: 'aura-nav-1', label: 'Prime Estates', pageSlug: 'home' },
         { id: 'aura-nav-2', label: 'Private Portfolio', pageSlug: 'properties' },
@@ -334,6 +335,7 @@ export const realEstateTemplates: WebsiteTemplate[] = [
       brandName: 'MONOLITH // ARCHITEKTUR',
       logoText: 'MONOLITH // STUDIO',
       layoutStyle: 'minimal',
+      metaText: "52°31'N 13°24'E • BERLIN / BASEL • MONOGRAPH [12]",
       links: [
         { id: 'mono-nav-1', label: 'Selected Works', pageSlug: 'home' },
         { id: 'mono-nav-2', label: 'Built Archives', pageSlug: 'portfolio' },

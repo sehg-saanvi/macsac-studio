@@ -39,7 +39,8 @@ export const portfolioTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'ELENA ROSTOVA',
       logoText: 'ELENA ROSTOVA // PARIS',
-      layoutStyle: 'floating',
+      layoutStyle: 'minimal',
+      metaText: "48°51'N 2°20'E • PARIS / MILAN • ARCHIVE [24]",
       links: [
         { id: 'er-nav-1', label: 'Overview', pageSlug: 'home' },
         { id: 'er-nav-2', label: 'Selected Galleries', pageSlug: 'portfolio' },
@@ -278,6 +279,7 @@ export const portfolioTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'JULIAN VANCE',
       logoText: 'JULIAN VANCE // PRODUCT DESIGN',
+      layoutStyle: 'floating',
       links: [
         { id: 'jv-nav-1', label: 'Index', pageSlug: 'home' },
         { id: 'jv-nav-2', label: 'Case Studies', pageSlug: 'projects' },
@@ -549,9 +551,10 @@ export const portfolioTemplates: WebsiteTemplate[] = [
       mode: 'dark',
     },
     navigation: {
-      brandName: 'SORA TANAKA',
+      brandName: 'SORA',
       logoText: 'SORA // CODE & SHADER LAB',
-      layoutStyle: 'minimal',
+      layoutStyle: 'terminal',
+      statusBadge: '● 60 FPS WEBGL',
       links: [
         { id: 'so-nav-1', label: 'Matrix', pageSlug: 'home' },
         { id: 'so-nav-2', label: 'Interactive Works', pageSlug: 'works' },
@@ -808,6 +811,8 @@ export const portfolioTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'MARCUS REID',
       logoText: 'MARCUS REID // STRATEGY & BOOKS',
+      layoutStyle: 'editorial',
+      metaText: 'NEW YORK TIMES BESTSELLING AUTHOR • KEYNOTE ADVISORY',
       links: [
         { id: 'mr-nav-1', label: 'Index', pageSlug: 'home' },
         { id: 'mr-nav-2', label: 'Published Books', pageSlug: 'books' },

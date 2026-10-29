@@ -39,6 +39,8 @@ export const eventTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'SOLEIL & CO.',
       logoText: 'SOLEIL & CO. // ATELIER',
+      layoutStyle: 'luxury-split',
+      announcement: 'FLORENCE • LAKE COMO • PROVENCE • 2027 CALENDAR NOW COMMENCING',
       links: [
         { id: 'sw-nav-1', label: 'The Atelier', pageSlug: 'home' },
         { id: 'sw-nav-2', label: 'Destination Stories', pageSlug: 'weddings' },
@@ -309,6 +311,8 @@ export const eventTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'CATALYST 2027',
       logoText: 'CATALYST // SUMMIT 2027',
+      layoutStyle: 'brutalist',
+      announcement: '⚡ OCTOBER 14–16, 2027 • MOSCONE CENTER SF • EARLY BIRD TIER: 88% ALLOCATED',
       links: [
         { id: 'cat-nav-1', label: 'Summit', pageSlug: 'home' },
         { id: 'cat-nav-2', label: '3-Day Agenda', pageSlug: 'schedule' },

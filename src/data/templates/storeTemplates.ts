@@ -39,6 +39,8 @@ export const storeTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'MAISON ÉTOILE',
       logoText: 'MAISON ÉTOILE // JOAILLERIE',
+      layoutStyle: 'luxury-split',
+      announcement: 'COMPLIMENTARY INSURED WHITE-GLOVE COURIER WORLDWIDE • PLACE VENDÔME PARIS',
       links: [
         { id: 'me-nav-1', label: 'Maison', pageSlug: 'home' },
         { id: 'me-nav-2', label: 'Collections', pageSlug: 'shop' },
@@ -294,6 +296,7 @@ export const storeTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'AURA BEAUTY',
       logoText: 'AURA // BOTANICAL SKINCARE',
+      layoutStyle: 'floating',
       links: [
         { id: 'ab-nav-1', label: 'The Ritual', pageSlug: 'home' },
         { id: 'ab-nav-2', label: 'Shop Formulations', pageSlug: 'shop' },
@@ -549,6 +552,8 @@ export const storeTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'SOLSTICE',
       logoText: 'SOLSTICE // CERAMIC ATELIER',
+      layoutStyle: 'masthead',
+      announcement: '🏺 SPRING WOOD-FIRED KILN DROP IS NOW LIVE • LIMITED 40 PIECES',
       links: [
         { id: 'sol-nav-1', label: 'The Atelier', pageSlug: 'home' },
         { id: 'sol-nav-2', label: 'Collections & Shop', pageSlug: 'shop' },
@@ -1059,7 +1064,8 @@ export const storeTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'ATELIER NOIR',
       logoText: 'ATELIER NOIR // PARIS',
-      layoutStyle: 'minimal',
+      layoutStyle: 'luxury-split',
+      announcement: 'HAUTE COUTURE RUNWAY DROP 04 • WORLDWIDE AIR COURIER',
       links: [
         { id: 'an-1', label: 'Runway', pageSlug: 'home' },
         { id: 'an-2', label: 'Shop The Drop', pageSlug: 'shop' },

@@ -39,6 +39,8 @@ export const educationTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'HARMONY EARTH',
       logoText: 'HARMONY EARTH FOUNDATION',
+      layoutStyle: 'floating',
+      statusBadge: '🌱 501(C)(3) ACCREDITED',
       links: [
         { id: 'he-nav-1', label: 'The Mission', pageSlug: 'home' },
         { id: 'he-nav-2', label: 'Global Initiatives', pageSlug: 'initiatives' },
@@ -312,6 +314,8 @@ export const educationTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'VERITAS ACADEMY',
       logoText: 'VERITAS // ONLINE ACADEMY',
+      layoutStyle: 'two-tier',
+      secondaryInfo: '🏛️ OXFORD • CAMBRIDGE • HARVARD GUEST FELLOWS • ADMISSIONS DESK: +1 (617) 555-0144',
       links: [
         { id: 'ver-nav-1', label: 'Overview', pageSlug: 'home' },
         { id: 'ver-nav-2', label: 'Master Curriculum', pageSlug: 'courses' },

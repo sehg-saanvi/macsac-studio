@@ -39,6 +39,8 @@ export const technologyTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'NOVATECH',
       logoText: 'NOVATECH // AI ENGINE',
+      layoutStyle: 'terminal',
+      statusBadge: '● LIVE v2.4',
       links: [
         { id: 'nt-nav-1', label: 'Platform', pageSlug: 'home' },
         { id: 'nt-nav-2', label: 'Architecture & Features', pageSlug: 'features' },
@@ -316,7 +318,8 @@ export const technologyTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'DEVPULSE',
       logoText: 'DEVPULSE // EDGE RUNTIME',
-      layoutStyle: 'minimal',
+      layoutStyle: 'terminal',
+      statusBadge: '● 310 PoPs',
       links: [
         { id: 'dp-nav-1', label: 'Runtime', pageSlug: 'home' },
         { id: 'dp-nav-2', label: 'Global Infrastructure', pageSlug: 'features' },
@@ -593,6 +596,7 @@ export const technologyTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'ORBIT ROBOTICS',
       logoText: 'ORBIT // AUTONOMOUS SYSTEMS',
+      layoutStyle: 'floating',
       links: [
         { id: 'orb-nav-1', label: 'Robotic Fleet', pageSlug: 'home' },
         { id: 'orb-nav-2', label: 'Systems Lineup', pageSlug: 'systems' },
@@ -865,6 +869,8 @@ export const technologyTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'ZENITH TREASURY',
       logoText: 'ZENITH // GLOBAL TREASURY',
+      layoutStyle: 'two-tier',
+      secondaryInfo: '💱 EUR/USD 1.084 • GBP/USD 1.282 • USD/JPY 154.2 • SWIFT DIRECT',
       links: [
         { id: 'zen-nav-1', label: 'Treasury Core', pageSlug: 'home' },
         { id: 'zen-nav-2', label: 'FX & Card Solutions', pageSlug: 'solutions' },

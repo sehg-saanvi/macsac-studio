@@ -39,7 +39,8 @@ export const editorialTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'THE CHRONICLE',
       logoText: 'THE CHRONICLE // VOL. XXIV',
-      layoutStyle: 'centered',
+      layoutStyle: 'editorial',
+      metaText: 'VOL. XXIV // ISSUE NO. 48 • PRINT & DIGITAL',
       tagline: 'A Weekly Review of Architecture, Typography & Modern Artifacts',
       links: [
         { id: 'tc-nav-1', label: 'Front Page', pageSlug: 'home' },
@@ -343,9 +344,10 @@ export const editorialTemplates: WebsiteTemplate[] = [
       mode: 'dark',
     },
     navigation: {
-      brandName: 'SYNTAX // JOURNAL',
+      brandName: 'SYNTAX',
       logoText: 'SYNTAX [SYS.ARCH]',
-      layoutStyle: 'minimal',
+      layoutStyle: 'terminal',
+      statusBadge: '● IEEE / ACM INDEXED',
       links: [
         { id: 'syn-nav-1', label: 'Index', pageSlug: 'home' },
         { id: 'syn-nav-2', label: 'Papers & Benchmarks', pageSlug: 'articles' },

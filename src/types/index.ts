@@ -203,7 +203,22 @@ export interface WebsiteTemplate {
     logoText: string;
     logoImage?: string;
     tagline?: string;
-    layoutStyle?: 'standard' | 'centered' | 'floating' | 'cinema' | 'minimal';
+    layoutStyle?:
+      | 'standard'
+      | 'centered'
+      | 'floating'
+      | 'cinema'
+      | 'minimal'
+      | 'masthead'
+      | 'terminal'
+      | 'luxury-split'
+      | 'editorial'
+      | 'two-tier'
+      | 'brutalist';
+    announcement?: string;
+    secondaryInfo?: string;
+    statusBadge?: string;
+    metaText?: string;
     links: Array<{ id: string; label: string; pageSlug: string }>;
     ctaText: string;
     ctaUrl: string;
@@ -233,7 +248,22 @@ export interface Project {
     logoText: string;
     logoImage?: string;
     tagline?: string;
-    layoutStyle?: 'standard' | 'centered' | 'floating' | 'cinema' | 'minimal';
+    layoutStyle?:
+      | 'standard'
+      | 'centered'
+      | 'floating'
+      | 'cinema'
+      | 'minimal'
+      | 'masthead'
+      | 'terminal'
+      | 'luxury-split'
+      | 'editorial'
+      | 'two-tier'
+      | 'brutalist';
+    announcement?: string;
+    secondaryInfo?: string;
+    statusBadge?: string;
+    metaText?: string;
     links: Array<{ id: string; label: string; pageSlug: string }>;
     ctaText: string;
     ctaUrl: string;

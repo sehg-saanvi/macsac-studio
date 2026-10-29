@@ -491,6 +491,8 @@ export const businessTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'APEX ADVISORY',
       logoText: 'APEX ADVISORY & CAPITAL',
+      layoutStyle: 'two-tier',
+      secondaryInfo: 'NEW YORK • LONDON • SINGAPORE • ZÜRICH • CAPITAL DESK: +1 (212) 555-0188',
       links: [
         { id: 'ap-nav-1', label: 'Home', pageSlug: 'home' },
         { id: 'ap-nav-2', label: 'Practices', pageSlug: 'practices' },
@@ -770,6 +772,8 @@ export const businessTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'VANGUARD LAB',
       logoText: 'VANGUARD // ARCHITECTURE',
+      layoutStyle: 'minimal',
+      metaText: "59°54'N 10°45'E • OSLO / BERLIN • INDEX [18]",
       links: [
         { id: 'va-nav-1', label: 'Index', pageSlug: 'home' },
         { id: 'va-nav-2', label: 'Built Works', pageSlug: 'projects' },
@@ -1022,6 +1026,8 @@ export const businessTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'HORIZON LEGAL',
       logoText: 'HORIZON LEGAL PARTNERS',
+      layoutStyle: 'two-tier',
+      secondaryInfo: '📞 24/7 LITIGATION HOTLINE: +1 (212) 555-0199 • MANHATTAN FEDERAL PLAZA',
       links: [
         { id: 'hl-nav-1', label: 'Home', pageSlug: 'home' },
         { id: 'hl-nav-2', label: 'Practices', pageSlug: 'practices' },
