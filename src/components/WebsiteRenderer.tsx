@@ -494,16 +494,20 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
               }}
               onDragOver={(e) => {
                 if (!isEditorMode) return;
+                if (dragIndexRef.current === null) return;
                 e.preventDefault();
                 e.dataTransfer.dropEffect = 'move';
                 setDragOverIndex(index);
               }}
               onDragLeave={() => {
-                setDragOverIndex(null);
+                if (dragIndexRef.current !== null) {
+                  setDragOverIndex(null);
+                }
               }}
               onDrop={(e) => {
+                if (dragIndexRef.current === null) return;
                 e.preventDefault();
-                if (dragIndexRef.current !== null && dragIndexRef.current !== index) {
+                if (dragIndexRef.current !== index) {
                   if (onReorderSections) {
                     onReorderSections(dragIndexRef.current, index);
                   } else if (onMoveSectionUp && onMoveSectionDown) {
@@ -1145,11 +1149,16 @@ function renderSectionContent(p: SectionRendererParams) {
           setDraggedItemInfo({ sectionId: section.id, index: itemIdx });
         }
         e.dataTransfer.effectAllowed = 'move';
+        try {
+          e.dataTransfer.setData('text/plain', it.id);
+        } catch {
+          // fallback
+        }
       },
       onDragOver: (e: React.DragEvent) => {
         if (draggedItemInfo && draggedItemInfo.sectionId === section.id) {
           e.preventDefault();
-          e.stopPropagation();
+          // Do not call e.stopPropagation() so global window/main listener catches dragover for smooth canvas auto-scrolling!
           e.dataTransfer.dropEffect = 'move';
           if (setDragOverItemId && dragOverItemId !== it.id) {
             setDragOverItemId(it.id);
@@ -1234,6 +1243,8 @@ function renderSectionContent(p: SectionRendererParams) {
       <Tag
         contentEditable
         suppressContentEditableWarning
+        draggable={false}
+        onDragStart={(e) => e.preventDefault()}
         onBlur={(e) => {
           const t = e.currentTarget.innerText.trim();
           if (t && t !== val) {
@@ -1274,6 +1285,8 @@ function renderSectionContent(p: SectionRendererParams) {
       <Tag
         contentEditable
         suppressContentEditableWarning
+        draggable={false}
+        onDragStart={(e) => e.preventDefault()}
         onBlur={(e) => {
           const t = e.currentTarget.innerText.trim();
           if (t && t !== val) {

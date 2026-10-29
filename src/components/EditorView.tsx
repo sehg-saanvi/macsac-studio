@@ -101,8 +101,10 @@ export const EditorView: React.FC<EditorViewProps> = ({
     const loop = () => {
       if (canvasMainRef.current && autoScrollSpeedRef.current !== 0) {
         canvasMainRef.current.scrollTop += autoScrollSpeedRef.current;
+        autoScrollAnimRef.current = requestAnimationFrame(loop);
+      } else {
+        autoScrollAnimRef.current = null;
       }
-      autoScrollAnimRef.current = requestAnimationFrame(loop);
     };
     autoScrollAnimRef.current = requestAnimationFrame(loop);
   };
@@ -119,19 +121,19 @@ export const EditorView: React.FC<EditorViewProps> = ({
     if (!canvasMainRef.current) return;
     const rect = canvasMainRef.current.getBoundingClientRect();
     const threshold = 140; // 140px active scroll zone from top/bottom
-    const maxSpeed = 24; // fast, smooth scroll speed
+    const maxSpeed = 26; // smooth, responsive scroll speed
 
     if (clientY < rect.top + threshold) {
       // Dragger is near top edge: scroll UP
       const distance = Math.max(0, clientY - rect.top);
       const intensity = Math.max(0, Math.min(1, (threshold - distance) / threshold));
-      autoScrollSpeedRef.current = -Math.max(4, Math.round(intensity * maxSpeed));
+      autoScrollSpeedRef.current = -Math.max(6, Math.round(intensity * maxSpeed));
       startAutoScrollLoop();
     } else if (clientY > rect.bottom - threshold) {
       // Dragger is near bottom edge: scroll DOWN
       const distance = Math.max(0, rect.bottom - clientY);
       const intensity = Math.max(0, Math.min(1, (threshold - distance) / threshold));
-      autoScrollSpeedRef.current = Math.max(4, Math.round(intensity * maxSpeed));
+      autoScrollSpeedRef.current = Math.max(6, Math.round(intensity * maxSpeed));
       startAutoScrollLoop();
     } else {
       // In middle: stop scrolling
@@ -142,6 +144,9 @@ export const EditorView: React.FC<EditorViewProps> = ({
   useEffect(() => {
     const handleGlobalDragOver = (e: DragEvent) => {
       e.preventDefault();
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = 'move';
+      }
       if (e.clientY !== undefined) {
         handlePointerDragMove(e.clientY);
       }
