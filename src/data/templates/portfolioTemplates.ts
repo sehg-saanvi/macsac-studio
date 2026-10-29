@@ -39,6 +39,7 @@ export const portfolioTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'ELENA ROSTOVA',
       logoText: 'ELENA ROSTOVA // PARIS',
+      layoutStyle: 'floating',
       links: [
         { id: 'er-nav-1', label: 'Overview', pageSlug: 'home' },
         { id: 'er-nav-2', label: 'Selected Galleries', pageSlug: 'portfolio' },
@@ -72,7 +73,7 @@ export const portfolioTemplates: WebsiteTemplate[] = [
           {
             id: 'erh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'portrait',
             badge: 'PARIS FASHION WEEK // HAUTE COUTURE 2026',
             title: 'Sculpting Shadows, High Fashion & Cinematic Light',
             subtitle: 'International Commercial & Editorial Photography',
@@ -85,7 +86,7 @@ export const portfolioTemplates: WebsiteTemplate[] = [
           {
             id: 'erh-portfolio-preview',
             type: 'portfolio',
-            layoutVariant: 'grid',
+            layoutVariant: 'lookbook',
             badge: 'CURATED ESSAYS',
             title: 'Selected Editorial Stories',
             description: 'A glimpse into recent fashion commissions photographed on medium-format film and digital sensors.',
@@ -311,7 +312,7 @@ export const portfolioTemplates: WebsiteTemplate[] = [
           {
             id: 'jvh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'typographic',
             badge: 'STAFF PRODUCT DESIGNER // SAN FRANCISCO',
             title: 'Transforming Dense Data Systems into Effortless Digital Experiences',
             subtitle: '12+ Years Designing for FinTech, Developer Tools & Design Systems',
@@ -550,6 +551,7 @@ export const portfolioTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'SORA TANAKA',
       logoText: 'SORA // CODE & SHADER LAB',
+      layoutStyle: 'minimal',
       links: [
         { id: 'so-nav-1', label: 'Matrix', pageSlug: 'home' },
         { id: 'so-nav-2', label: 'Interactive Works', pageSlug: 'works' },
@@ -584,7 +586,7 @@ export const portfolioTemplates: WebsiteTemplate[] = [
           {
             id: 'soh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'terminal',
             badge: 'WEBGL // WEBGPU // AUDIO-REACTIVE SHADERS',
             title: 'Synthesizing Real-Time Interactive Worlds with Code',
             subtitle: 'Creative Technologist & Generative Media Developer',
@@ -597,8 +599,8 @@ export const portfolioTemplates: WebsiteTemplate[] = [
           {
             id: 'soh-works-preview',
             type: 'portfolio',
-            layoutVariant: 'grid',
-            badge: 'COMMERCIAL WORKS',
+            layoutVariant: 'lookbook',
+            badge: 'GENERATIVE INDEX',
             title: 'Selected Interactive Installations',
             description: 'Recent WebGPU commercial brand campaigns and museum commissions.',
             items: [
@@ -1288,4 +1290,6 @@ export const portfolioTemplates: WebsiteTemplate[] = [
     ],
   },
 ];
+
+
 

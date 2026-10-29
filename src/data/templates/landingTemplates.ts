@@ -1,0 +1,248 @@
+import { WebsiteTemplate } from '../../types';
+
+export const landingTemplates: WebsiteTemplate[] = [
+  /* -------------------------------------------------------------------------- */
+  /* 1. Pulse — AI Biometrics & Adaptive Fitness App Launch                      */
+  /* -------------------------------------------------------------------------- */
+  {
+    id: 'pulse-app-launch',
+    name: 'Pulse — AI Biometrics & Adaptive Fitness App Launch',
+    description: 'A vibrant, ultra-modern landing page template for next-generation mobile applications, consumer wearables, and SaaS product launches featuring interactive bento widgets and waitlist funnels.',
+    category: 'landing',
+    categoryLabel: 'App Launch & Waitlist',
+    aesthetic: 'bold',
+    aestheticLabel: 'Electric Violet & Cyber Dark',
+    targetAudience: 'both',
+    themeMode: 'dark',
+    isMultiPage: true,
+    isPopular: true,
+    isNew: true,
+    previewImage: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=1200&q=80',
+    tags: ['landing page', 'mobile app', 'fitness', 'biometrics', 'wearable', 'saas', 'waitlist', 'bento grid', 'product launch'],
+    theme: {
+      id: 'pulse-neon-violet',
+      name: 'Cyber Onyx & Electric Violet',
+      primaryColor: '#8b5cf6',
+      secondaryColor: '#a78bfa',
+      accentColor: '#06b6d4',
+      bgColor: '#0b0c10',
+      textColor: '#f3f4f6',
+      textMuted: '#9ca3af',
+      cardBg: '#13151c',
+      borderColor: '#262936',
+      headingFont: 'Plus Jakarta Sans, sans-serif',
+      bodyFont: 'Inter, sans-serif',
+      borderRadius: '16px',
+      buttonStyle: 'pill',
+      mode: 'dark',
+    },
+    navigation: {
+      brandName: 'PULSE BIO',
+      logoText: 'PULSE // AI HEALTH',
+      layoutStyle: 'floating',
+      links: [
+        { id: 'pulse-nav-1', label: 'App Overview', pageSlug: 'home' },
+        { id: 'pulse-nav-2', label: 'Science & Sensor Specs', pageSlug: 'specs' },
+        { id: 'pulse-nav-3', label: 'Roadmap', pageSlug: 'roadmap' },
+        { id: 'pulse-nav-4', label: 'Join Early Access', pageSlug: 'waitlist' },
+      ],
+      ctaText: 'Get iOS Beta',
+      ctaUrl: 'waitlist',
+    },
+    footer: {
+      brandName: 'PULSE HEALTH TECHNOLOGIES INC.',
+      tagline: 'Continuous physiological intelligence powered by on-device neural biometric modeling.',
+      copyright: '© 2026 Pulse Health Inc. Certified Medical Sensor Architecture.',
+      links: [
+        { label: 'Hardware Specs', url: 'specs' },
+        { label: 'Public Roadmap', url: 'roadmap' },
+        { label: 'Beta Waitlist', url: 'waitlist' },
+      ],
+      socialLinks: [
+        { platform: 'Twitter', url: 'https://twitter.com' },
+        { platform: 'Instagram', url: 'https://instagram.com' },
+      ],
+    },
+    pages: [
+      /* PAGE 1: HOME */
+      {
+        id: 'pulse-page-home',
+        name: 'App Overview',
+        slug: 'home',
+        isHome: true,
+        sections: [
+          {
+            id: 'pulse-hero',
+            type: 'hero',
+            layoutVariant: 'typographic',
+            badge: 'NOW IN PRIVATE TESTFLIGHT BETA',
+            title: 'Your Body’s Real-Time Operating System',
+            subtitle: 'Translating autonomic nervous system signals into peak physical performance.',
+            description: 'Pulse syncs with your biometric sensors to predict burnout 36 hours ahead of symptoms, personalize circadian sleep architecture, and optimize VO2-max intervals dynamically.',
+            primaryBtn: { text: 'Claim Early Founder Access', url: 'waitlist', show: true },
+            secondaryBtn: { text: 'Explore Sensor Specs', url: 'specs', show: true },
+            image: 'https://images.unsplash.com/photo-1510519138195-068d828884bb?auto=format&fit=crop&w=1200&q=80',
+            imageAlt: 'Sleek smartphone displaying futuristic bio-metric glowing dashboard',
+          },
+          {
+            id: 'pulse-features-bento',
+            type: 'features',
+            layoutVariant: 'bento',
+            badge: 'INTELLIGENT TELEMETRY',
+            title: 'Engineered for Elite Human Capability',
+            description: 'Three core telemetry pillars designed alongside Olympic trainers and neuroscientists.',
+            features: [
+              {
+                id: 'pf-1',
+                title: 'Predictive Strain & HRV Neural Modeling',
+                description: 'Our proprietary micro-variance algorithm tracks beat-to-beat ECG intervals to forecast adrenal fatigue before you feel it.',
+                icon: 'zap',
+              },
+              {
+                id: 'pf-2',
+                title: 'Circadian Metabolic Clock',
+                description: 'Aligns your nutrition, caffeine timing, and deep work intervals with core body temperature oscillations.',
+                icon: 'sun',
+              },
+              {
+                id: 'pf-3',
+                title: 'Zero-Cloud Biometric Encryption',
+                description: 'All neural inferences process directly inside Apple Neural Engine / Qualcomm NPU. Your biometric data never touches an unencrypted cloud server.',
+                icon: 'lock',
+              },
+            ],
+          },
+          {
+            id: 'pulse-stats',
+            type: 'stats',
+            layoutVariant: 'centered',
+            badge: 'CLINICAL VALIDATION',
+            title: 'Measured Impacts in Controlled Trials',
+            description: 'Results from double-blind human trials conducted with Stanford Human Performance Lab.',
+            stats: [
+              { value: '+41%', label: 'Deep Sleep REM Increase' },
+              { value: '-68%', label: 'Overtraining Injury Rate' },
+              { value: '99.4%', label: 'HRV ECG Accuracy' },
+              { value: '180,000+', label: 'Athletes on Waitlist' },
+            ],
+          },
+        ],
+      },
+      /* PAGE 2: SPECS */
+      {
+        id: 'pulse-page-specs',
+        name: 'Science & Sensor Specs',
+        slug: 'specs',
+        sections: [
+          {
+            id: 'pulses-hero',
+            type: 'hero',
+            layoutVariant: 'centered',
+            badge: 'CLINICAL HARDWARE',
+            title: 'Sub-Millisecond Medical Telemetry',
+            subtitle: 'Aerospace-grade titanium, PPG photoplethysmography, and multi-spectral infrared.',
+            description: 'Designed to capture medical-grade cardiovascular metrics with zero skin irritation or optical cross-talk.',
+            primaryBtn: { text: 'Preorder Pulse Sensor Band', url: 'waitlist', show: true },
+            secondaryBtn: { text: 'Back to Overview', url: 'home', show: true },
+          },
+          {
+            id: 'pulses-matrix',
+            type: 'specs',
+            layoutVariant: 'specs',
+            badge: 'HARDWARE SPECIFICATIONS',
+            title: 'Pulse BioBand Pro v1.0',
+            description: 'Detailed mechanical and biological telemetry benchmarks.',
+            specItems: [
+              { label: 'Optical Sensor Array', value: '8-Channel Multi-Spectral PPG (Green, Red, 940nm Infrared)' },
+              { label: 'Sampling Frequency', value: '250 Hz Continuous raw ECG & PPG recording' },
+              { label: 'Chassis Material', value: 'Grade 5 Aerospace Titanium with DLC Diamond-Like Carbon Coating' },
+              { label: 'Water Resistance', value: '10 ATM (100 Meters / 330 Feet ISO 22810)' },
+              { label: 'Battery Endurance', value: '14 Days continuous wear with 20-minute fast wireless charging' },
+              { label: 'On-Device Processor', value: 'Dual-core ARM Cortex-M33 with dedicated NPU coprocessor' },
+            ],
+          },
+        ],
+      },
+      /* PAGE 3: ROADMAP */
+      {
+        id: 'pulse-page-roadmap',
+        name: 'Roadmap',
+        slug: 'roadmap',
+        sections: [
+          {
+            id: 'pulser-hero',
+            type: 'hero',
+            layoutVariant: 'centered',
+            badge: 'PUBLIC ENGINEERING ROADMAP',
+            title: 'The Evolution of Human Biometrics',
+            subtitle: 'Transparent release milestones from private beta to global shipping.',
+            description: 'Track our engineering sprints as we roll out continuous glucose monitoring integration and audio coaching.',
+            primaryBtn: { text: 'Vote on Features', url: 'waitlist', show: true },
+            secondaryBtn: { text: 'Return Home', url: 'home', show: true },
+          },
+          {
+            id: 'pulser-timeline',
+            type: 'timeline',
+            layoutVariant: 'timeline',
+            badge: 'RELEASE TIMELINE',
+            title: '2026–2027 Engineering Milestones',
+            description: 'Live progress tracking across mobile software and hardware firmware.',
+            timelineSteps: [
+              {
+                step: 'Q1 2026',
+                title: 'Closed TestFlight Alpha (Completed)',
+                description: 'Onboarded 2,500 Olympic athletes and triathletes; validated algorithm accuracy against hospital ECG holter monitors.',
+              },
+              {
+                step: 'Q2 2026',
+                title: 'Public Beta & Continuous Sleep AI',
+                description: 'Expanding to 25,000 waitlist members; launching circadian light coaching and smart acoustic wake alarms.',
+              },
+              {
+                step: 'Q3 2026',
+                title: 'Hardware Production & Global Shipping',
+                description: 'Batch 1 of Pulse BioBand Pro begins dispatching worldwide with custom titanium sizing kits.',
+              },
+              {
+                step: 'Q4 2026',
+                title: 'Non-Invasive Glucose & Lactate Telemetry',
+                description: 'Firmware update enabling real-time optical tracking of blood lactate thresholds during endurance runs.',
+              },
+            ],
+          },
+        ],
+      },
+      /* PAGE 4: WAITLIST */
+      {
+        id: 'pulse-page-waitlist',
+        name: 'Join Early Access',
+        slug: 'waitlist',
+        sections: [
+          {
+            id: 'pulsew-hero',
+            type: 'hero',
+            layoutVariant: 'centered',
+            badge: 'PRIORITY ACCESS ACCESS CODE: FOUNDER26',
+            title: 'Claim Your Founder Beta Seat',
+            subtitle: 'Batch 01 is strictly limited to 5,000 devices worldwide.',
+            description: 'Lock in lifetime free software subscriptions and receive direct access to our engineering team Slack channel.',
+            primaryBtn: { text: 'Join Priority Waitlist', url: 'waitlist', show: true },
+            secondaryBtn: { text: 'Review Specifications', url: 'specs', show: true },
+          },
+          {
+            id: 'pulsew-contact',
+            type: 'contact',
+            layoutVariant: 'split',
+            badge: 'SAN FRANCISCO HQ',
+            title: 'Pulse Technologies Labs',
+            description: 'Reach out for research partnerships, university clinical studies, or athlete sponsorship.',
+            email: 'founders@pulsebio.health',
+            phone: '+1 (415) 555-0941',
+            address: '420 Pier, Embarcadero Center, San Francisco, CA 94111',
+          },
+        ],
+      },
+    ],
+  },
+];
+

@@ -1,5 +1,5 @@
 import React from 'react';
-import { TrendingUp, Briefcase, Camera, Compass } from 'lucide-react';
+import { TrendingUp, Briefcase, Camera, Compass, Building, Sparkles } from 'lucide-react';
 import { WebsiteTemplate } from '../types';
 import { TemplateCard } from './TemplateCard';
 
@@ -21,15 +21,20 @@ export const CuratedSections: React.FC<CuratedSectionsProps> = ({
   const popularTemplates = templates.filter(t => t.isPopular).slice(0, 3);
   const businessTemplates = templates.filter(t => t.category === 'business').slice(0, 3);
   const portfolioTemplates = templates.filter(t => t.category === 'portfolio').slice(0, 3);
+  const realEstateTemplates = templates.filter(t => t.category === 'realestate').slice(0, 3);
 
   const purposeList = [
-    { id: 'business', label: 'Commercial & Agencies', desc: 'Consulting, legal & architecture studios' },
-    { id: 'portfolio', label: 'Creative Portfolios', desc: 'Designers, photographers & authors' },
-    { id: 'store', label: 'Online Stores', desc: 'Fine jewelry, fashion & ceramics' },
-    { id: 'hospitality', label: 'Food & Hospitality', desc: 'Bakeries, trattorias & luxury seaside resorts' },
-    { id: 'technology', label: 'Technology & SaaS', desc: 'AI runtimes, edge cloud & robotics' },
-    { id: 'education', label: 'Education & Non-Profit', desc: 'Foundations & executive academies' },
-    { id: 'events', label: 'Events & Celebrations', desc: 'Destination weddings & global tech summits' },
+    { id: 'agency', label: 'Creative Agencies', desc: 'Design ateliers, branding & media studios' },
+    { id: 'business', label: 'Corporate & Consulting', desc: 'Strategic advisory, capital & legal practices' },
+    { id: 'realestate', label: 'Real Estate & Living', desc: 'Prime penthouses, villas & architecture' },
+    { id: 'portfolio', label: 'Portfolios & Art', desc: 'Designers, creative coders & photographers' },
+    { id: 'technology', label: 'SaaS & Deep Tech', desc: 'AI runtimes, edge cloud & robotics' },
+    { id: 'store', label: 'Online Stores', desc: 'Haute couture, fine jewelry & ceramics' },
+    { id: 'hospitality', label: 'Dining & Hospitality', desc: 'Artisan bakeries, trattorias & luxury resorts' },
+    { id: 'editorial', label: 'Magazines & Editorial', desc: 'Design critiques, tech journals & publications' },
+    { id: 'landing', label: 'App Launch & Waitlist', desc: 'Next-gen mobile apps & consumer wearables' },
+    { id: 'education', label: 'Education & Non-Profit', desc: 'Conservation foundations & academies' },
+    { id: 'events', label: 'Conferences & Events', desc: 'Global tech summits & ateliers' },
   ];
 
   const aestheticList = [
@@ -130,6 +135,37 @@ export const CuratedSections: React.FC<CuratedSectionsProps> = ({
           </div>
         </div>
       </section>
+
+      {/* 4. Luxury Real Estate & Architecture */}
+      {realEstateTemplates.length > 0 && (
+        <section style={{ padding: '40px 0', background: 'var(--bg-secondary)' }}>
+          <div className="container">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 28 }}>
+              <div>
+                <div className="badge-copper" style={{ marginBottom: 8 }}>
+                  <Building size={13} /> Architectural Pedigree
+                </div>
+                <h2 style={{ fontSize: '1.9rem', fontWeight: 800 }}>Real Estate & Architectural Living</h2>
+              </div>
+              <button
+                onClick={() => onSelectCategory('realestate')}
+                style={{ fontSize: '0.88rem', color: 'var(--copper-medium)', fontWeight: 600 }}
+              >
+                All Real Estate Templates →
+              </button>
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+              gap: 24,
+            }}>
+              {realEstateTemplates.map((t) => (
+                <TemplateCard key={t.id} template={t} onPreview={onPreview} onCustomize={onCustomize} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 4. Templates Organized by Purpose & Aesthetic */}
       <section style={{ padding: '60px 0', background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-color)' }}>

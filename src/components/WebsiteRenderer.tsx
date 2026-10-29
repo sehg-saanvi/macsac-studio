@@ -192,11 +192,28 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
     }
   };
 
+  const getContrastTextColor = (hexColor: string): string => {
+    if (!hexColor) return '#ffffff';
+    let hex = hexColor.replace('#', '').trim();
+    if (hex.length === 3) {
+      hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    if (hex.length === 6) {
+      const r = parseInt(hex.substring(0, 2), 16) / 255;
+      const g = parseInt(hex.substring(2, 4), 16) / 255;
+      const b = parseInt(hex.substring(4, 6), 16) / 255;
+      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      return lum > 0.55 ? '#0a0a0c' : '#ffffff';
+    }
+    return '#ffffff';
+  };
+
   const getButtonStyles = (isPrimary: boolean): React.CSSProperties => {
     if (isPrimary) {
+      const textColor = getContrastTextColor(theme.primaryColor);
       const styles: React.CSSProperties = {
         background: theme.primaryColor,
-        color: '#ffffff',
+        color: textColor,
         border: '1px solid transparent',
         cursor: 'pointer',
         transition: 'all 0.2s ease',
@@ -278,12 +295,13 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
           style={{
             maxWidth: 1200,
             margin: '0 auto',
-            padding: isMobile ? '12px 18px' : isTablet ? '12px 24px' : '16px 28px',
+            padding: isMobile ? '10px 16px' : isTablet ? '10px 18px' : '16px 28px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             boxSizing: 'border-box',
-            minHeight: isTablet ? 60 : 56,
+            minHeight: isTablet ? 54 : 56,
+            gap: isTablet ? 12 : 24,
           }}
         >
           {/* Site Logo */}
@@ -292,7 +310,7 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
             style={{
               fontFamily: theme.headingFont,
               fontWeight: 800,
-              fontSize: isMobile ? '1.05rem' : isTablet ? '1.15rem' : '1.3rem',
+              fontSize: isMobile ? '1.02rem' : isTablet ? '1.08rem' : '1.3rem',
               letterSpacing: '-0.02em',
               cursor: 'pointer',
               color: theme.textColor,
@@ -301,46 +319,51 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
               gap: 8,
               flexShrink: 0,
               whiteSpace: 'nowrap',
+              maxWidth: isTablet ? 180 : 'none',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
             }}
           >
             {navigation.logoImage && (
               <img
                 src={navigation.logoImage}
                 alt={navigation.logoText || projectName}
-                style={{ maxHeight: isMobile ? 26 : isTablet ? 30 : 34, maxWidth: 110, objectFit: 'contain', flexShrink: 0 }}
+                style={{ maxHeight: isMobile ? 24 : isTablet ? 26 : 34, maxWidth: 100, objectFit: 'contain', flexShrink: 0 }}
               />
             )}
-            <span style={{ whiteSpace: 'nowrap' }}>
+            <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {navigation.logoText || projectName}
             </span>
           </div>
 
-          {/* Desktop & Tablet Nav Links */}
+          {/* Desktop Nav Links (full) & Tablet Nav Links (sleek compact pills) */}
           <nav
             style={{
               display: isMobile ? 'none' : 'flex',
               alignItems: 'center',
-              gap: isTablet ? 14 : 28,
+              gap: isTablet ? 6 : 28,
               justifyContent: 'center',
               flexWrap: 'nowrap',
+              flex: 1,
+              maxWidth: isTablet ? 420 : 680,
+              overflow: 'hidden',
             }}
           >
-            {allPages.map((p) => {
+            {(isTablet && allPages.length > 2 ? allPages.slice(0, 2) : allPages).map((p) => {
               const isActive = p.id === activePageId;
               return (
                 <button
                   key={p.id}
                   onClick={() => onNavigatePage(p.slug)}
                   style={{
-                    fontSize: isTablet ? '0.84rem' : '0.94rem',
+                    fontSize: isTablet ? '0.78rem' : '0.94rem',
                     fontWeight: isActive ? 700 : 500,
                     color: isActive ? theme.primaryColor : theme.textMuted,
-                    borderBottom: isActive ? `2px solid ${theme.primaryColor}` : '2px solid transparent',
-                    paddingBottom: 4,
-                    paddingLeft: 2,
-                    paddingRight: 2,
+                    backgroundColor: isTablet && isActive ? `${theme.primaryColor}14` : 'transparent',
+                    borderBottom: !isTablet && isActive ? `2px solid ${theme.primaryColor}` : '2px solid transparent',
+                    borderRadius: isTablet ? 6 : 0,
+                    padding: isTablet ? '5px 8px' : '4px 2px',
                     transition: 'all 0.15s ease',
-                    background: 'none',
                     borderTop: 'none',
                     borderLeft: 'none',
                     borderRight: 'none',
@@ -353,17 +376,37 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
                 </button>
               );
             })}
+
+            {/* Tablet "+ More" pill button if many pages */}
+            {isTablet && allPages.length > 2 && (
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                style={{
+                  fontSize: '0.76rem',
+                  fontWeight: 600,
+                  color: theme.primaryColor,
+                  background: `${theme.primaryColor}14`,
+                  border: `1px solid ${theme.primaryColor}33`,
+                  borderRadius: 6,
+                  padding: '4px 8px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                +{allPages.length - 2} more
+              </button>
+            )}
           </nav>
 
-          {/* Right Action / Mobile Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          {/* Right Action & Tablet/Mobile Toggle */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: isTablet ? 8 : 12, flexShrink: 0 }}>
             {navigation.ctaText && !isMobile && (
               <button
                 onClick={() => handleActionClick(navigation.ctaUrl, navigation.ctaText)}
                 style={{
                   ...getButtonStyles(true),
-                  padding: isTablet ? '8px 16px' : '10px 22px',
-                  fontSize: isTablet ? '0.82rem' : '0.9rem',
+                  padding: isTablet ? '6px 13px' : '10px 22px',
+                  fontSize: isTablet ? '0.78rem' : '0.9rem',
                   whiteSpace: 'nowrap',
                 }}
               >
@@ -371,12 +414,13 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
               </button>
             )}
 
+            {/* Hamburger Toggle Button for Mobile and congested Tablet */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               style={{
-                display: isMobile ? 'flex' : 'none',
+                display: isMobile || (isTablet && allPages.length > 4) ? 'flex' : 'none',
                 color: theme.textColor,
-                padding: '8px 10px',
+                padding: isTablet ? '6px 8px' : '8px 10px',
                 background: theme.cardBg,
                 border: `1px solid ${theme.borderColor}`,
                 borderRadius: theme.borderRadius,
@@ -386,13 +430,13 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
               }}
               aria-label="Toggle Navigation Menu"
             >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation Drawer */}
-        {mobileMenuOpen && isMobile && (
+        {/* Responsive Mobile & Tablet Drawer */}
+        {mobileMenuOpen && (isMobile || isTablet) && (
           <div
             style={{
               padding: '16px 20px',
@@ -402,6 +446,8 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
               flexDirection: 'column',
               gap: 8,
               boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
+              maxHeight: '65vh',
+              overflowY: 'auto',
             }}
           >
             {allPages.map((p) => {
@@ -415,9 +461,9 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
                   }}
                   style={{
                     textAlign: 'left',
-                    fontSize: '0.96rem',
+                    fontSize: '0.94rem',
                     fontWeight: isActive ? 700 : 500,
-                    padding: '12px 14px',
+                    padding: '11px 14px',
                     borderRadius: theme.borderRadius,
                     backgroundColor: isActive ? `${theme.primaryColor}18` : 'transparent',
                     color: isActive ? theme.primaryColor : theme.textColor,
@@ -454,8 +500,8 @@ export const WebsiteRenderer: React.FC<WebsiteRendererProps> = ({
                 style={{
                   ...getButtonStyles(true),
                   width: '100%',
-                  padding: '13px',
-                  fontSize: '0.94rem',
+                  padding: '12px',
+                  fontSize: '0.92rem',
                   marginTop: 10,
                 }}
               >
@@ -1236,8 +1282,14 @@ function renderSectionContent(p: SectionRendererParams) {
     style?: React.CSSProperties
   ) => {
     if (!val) return null;
+    const computedStyle: React.CSSProperties = {
+      color: theme.textColor,
+      wordBreak: 'break-word',
+      overflowWrap: 'break-word',
+      ...style,
+    };
     if (!isEditorMode || !onUpdateSection) {
-      return <Tag style={style}>{val}</Tag>;
+      return <Tag style={computedStyle}>{val}</Tag>;
     }
     return (
       <Tag
@@ -1256,7 +1308,7 @@ function renderSectionContent(p: SectionRendererParams) {
           if (onSelectSection) onSelectSection(section.id);
         }}
         style={{
-          ...style,
+          ...computedStyle,
           cursor: 'text',
           outline: '1px dashed rgba(177,112,78,0.4)',
           outlineOffset: '2px',
@@ -1278,8 +1330,14 @@ function renderSectionContent(p: SectionRendererParams) {
     style?: React.CSSProperties
   ) => {
     if (!val) return null;
+    const computedStyle: React.CSSProperties = {
+      color: theme.textColor,
+      wordBreak: 'break-word',
+      overflowWrap: 'break-word',
+      ...style,
+    };
     if (!isEditorMode || !onUpdateItem) {
-      return <Tag style={style}>{val}</Tag>;
+      return <Tag style={computedStyle}>{val}</Tag>;
     }
     return (
       <Tag
@@ -1298,7 +1356,7 @@ function renderSectionContent(p: SectionRendererParams) {
           if (onSelectSection) onSelectSection(section.id);
         }}
         style={{
-          ...style,
+          ...computedStyle,
           cursor: 'text',
           outline: '1px dashed rgba(177,112,78,0.4)',
           outlineOffset: '2px',
@@ -1413,7 +1471,1849 @@ function renderSectionContent(p: SectionRendererParams) {
 
   switch (section.type) {
     /* -------------------------------- HERO -------------------------------- */
-    case 'hero':
+    /* -------------------------------- HERO -------------------------------- */
+    case 'hero': {
+      /* 1. CINEMA / IMMERSIVE HERO (Photography, Fine Dining, Luxury Boutique) */
+      if (section.layoutVariant === 'cinema') {
+        return (
+          <section
+            style={{
+              position: 'relative',
+              padding: isMobile ? '80px 18px 70px' : isTablet ? '110px 28px 90px' : '150px 32px 130px',
+              backgroundColor: '#0c0a09',
+              color: '#ffffff',
+              overflow: 'hidden',
+              boxSizing: 'border-box',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            {/* Background Image with Dark Vignette Overlay */}
+            {section.image && (
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  zIndex: 0,
+                  backgroundImage: `url(${section.image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  filter: 'brightness(0.38) saturate(1.15)',
+                  transform: 'scale(1.02)',
+                }}
+              />
+            )}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                zIndex: 1,
+                background:
+                  'radial-gradient(circle at center, rgba(12,10,9,0.4) 0%, rgba(12,10,9,0.85) 75%, #0c0a09 100%)',
+              }}
+            />
+
+            {/* Floating Glassmorphism Center Panel */}
+            <div
+              style={{
+                position: 'relative',
+                zIndex: 2,
+                maxWidth: 880,
+                margin: '0 auto',
+                textAlign: 'center',
+                padding: isMobile ? '28px 18px' : isTablet ? '40px 32px' : '52px 48px',
+                borderRadius: '16px',
+                background: 'rgba(24, 20, 18, 0.65)',
+                backdropFilter: 'blur(16px)',
+                WebkitBackdropFilter: 'blur(16px)',
+                border: '1px solid rgba(255, 255, 255, 0.14)',
+                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.5)',
+              }}
+            >
+              {section.badge && (
+                <div style={{ marginBottom: 14 }}>
+                  {et('span', 'badge', section.badge, {
+                    display: 'inline-block',
+                    fontSize: isMobile ? '0.72rem' : '0.8rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.12em',
+                    padding: '6px 16px',
+                    borderRadius: '9999px',
+                    backgroundColor: `${theme.primaryColor}33`,
+                    color: '#f5ece5',
+                    border: `1px solid ${theme.primaryColor}66`,
+                  })}
+                </div>
+              )}
+
+              {et('h1', 'title', section.title, {
+                fontFamily: theme.headingFont,
+                fontSize: isMobile
+                  ? 'clamp(2rem, 8vw, 2.7rem)'
+                  : isTablet
+                  ? 'clamp(2.5rem, 5vw, 3.4rem)'
+                  : 'clamp(3rem, 5.5vw, 4.4rem)',
+                fontWeight: 800,
+                lineHeight: 1.1,
+                marginBottom: 18,
+                letterSpacing: '-0.025em',
+                color: '#ffffff',
+                textShadow: '0 4px 20px rgba(0,0,0,0.6)',
+              })}
+
+              {section.description &&
+                et('p', 'description', section.description, {
+                  fontSize: isMobile ? '0.98rem' : isTablet ? '1.08rem' : '1.2rem',
+                  color: 'rgba(255, 255, 255, 0.85)',
+                  lineHeight: 1.65,
+                  marginBottom: 28,
+                  maxWidth: 680,
+                  margin: '0 auto 28px',
+                  textShadow: '0 2px 10px rgba(0,0,0,0.5)',
+                })}
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 14,
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                }}
+              >
+                {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                  padding: isMobile ? '12px 24px' : '14px 34px',
+                  fontSize: isMobile ? '0.92rem' : '0.98rem',
+                  boxShadow: `0 8px 24px ${theme.primaryColor}66`,
+                })}
+                {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                  padding: isMobile ? '12px 22px' : '14px 28px',
+                  fontSize: isMobile ? '0.92rem' : '0.98rem',
+                  color: '#ffffff',
+                  border: '1px solid rgba(255, 255, 255, 0.3)',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                })}
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      /* 2. DEVELOPER / TERMINAL HERO (Dev Tools, API & Tech Portfolio) */
+      if (section.layoutVariant === 'terminal') {
+        return (
+          <section
+            style={{
+              padding: `${paddingY} ${paddingX}`,
+              backgroundColor: '#0a0d12',
+              color: '#e2e8f0',
+              boxSizing: 'border-box',
+              borderBottom: '1px solid #1e293b',
+            }}
+          >
+            <div
+              style={{
+                maxWidth: 1200,
+                margin: '0 auto',
+                display: isMobile ? 'flex' : 'grid',
+                flexDirection: isMobile ? 'column' : undefined,
+                gridTemplateColumns: isMobile ? undefined : isTablet ? '1fr 1fr' : '1.15fr 1fr',
+                alignItems: 'center',
+                gap: isMobile ? 32 : isTablet ? 32 : 48,
+              }}
+            >
+              {/* Left Column: Tech Copy */}
+              <div>
+                {section.badge && (
+                  <div style={{ marginBottom: 14 }}>
+                    {et('span', 'badge', section.badge, {
+                      fontFamily: 'monospace',
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      color: '#38bdf8',
+                      backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                      border: '1px solid rgba(56, 189, 248, 0.3)',
+                      padding: '4px 12px',
+                      borderRadius: 6,
+                      display: 'inline-block',
+                    })}
+                  </div>
+                )}
+
+                {et('h1', 'title', section.title, {
+                  fontFamily: theme.headingFont,
+                  fontSize: isMobile
+                    ? 'clamp(2rem, 7.5vw, 2.6rem)'
+                    : isTablet
+                    ? 'clamp(2.2rem, 4.2vw, 2.9rem)'
+                    : 'clamp(2.6rem, 5vw, 3.8rem)',
+                  fontWeight: 800,
+                  lineHeight: 1.14,
+                  marginBottom: 18,
+                  letterSpacing: '-0.025em',
+                  color: '#f8fafc',
+                })}
+
+                {section.description &&
+                  et('p', 'description', section.description, {
+                    fontSize: isMobile ? '0.96rem' : '1.08rem',
+                    color: '#94a3b8',
+                    lineHeight: 1.65,
+                    marginBottom: 28,
+                  })}
+
+                {/* Primary & Secondary Action */}
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 28 }}>
+                  {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                    padding: isMobile ? '12px 24px' : '13px 30px',
+                    fontSize: '0.94rem',
+                    backgroundColor: theme.primaryColor,
+                    borderRadius: 6,
+                  })}
+                  {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                    padding: isMobile ? '12px 20px' : '13px 24px',
+                    fontSize: '0.94rem',
+                    color: '#e2e8f0',
+                    border: '1px solid #334155',
+                    borderRadius: 6,
+                  })}
+                </div>
+
+                {/* Tech Stack Pills */}
+                {section.items && section.items.length > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.76rem', color: '#64748b', fontWeight: 600, fontFamily: 'monospace' }}>
+                      STACK:
+                    </span>
+                    {section.items.map((it) => (
+                      <span
+                        key={it.id}
+                        style={{
+                          fontSize: '0.74rem',
+                          fontFamily: 'monospace',
+                          background: '#1e293b',
+                          color: '#cbd5e1',
+                          padding: '3px 8px',
+                          borderRadius: 4,
+                          border: '1px solid #334155',
+                        }}
+                      >
+                        {it.title}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column: Code Window Console */}
+              <div
+                style={{
+                  width: '100%',
+                  background: '#0f172a',
+                  border: '1px solid #334155',
+                  borderRadius: 12,
+                  overflow: 'hidden',
+                  boxShadow: '0 20px 48px rgba(0,0,0,0.5)',
+                }}
+              >
+                {/* Window Chrome */}
+                <div
+                  style={{
+                    background: '#1e293b',
+                    padding: '10px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    borderBottom: '1px solid #334155',
+                  }}
+                >
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#ef4444' }} />
+                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#eab308' }} />
+                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e' }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <span
+                      style={{
+                        fontSize: '0.74rem',
+                        fontFamily: 'monospace',
+                        color: '#38bdf8',
+                        background: '#0f172a',
+                        padding: '2px 8px',
+                        borderRadius: 4,
+                      }}
+                    >
+                      index.ts
+                    </span>
+                    <span style={{ fontSize: '0.74rem', fontFamily: 'monospace', color: '#64748b' }}>
+                      schema.sql
+                    </span>
+                  </div>
+                  <span style={{ fontSize: '0.7rem', color: '#64748b', fontFamily: 'monospace' }}>
+                    macsac-cli v2.4
+                  </span>
+                </div>
+
+                {/* Code Body */}
+                <div
+                  style={{
+                    padding: isMobile ? '16px 14px' : '20px 22px',
+                    fontFamily: "'Fira Code', 'JetBrains Mono', Consolas, monospace",
+                    fontSize: isMobile ? '0.76rem' : '0.86rem',
+                    lineHeight: 1.7,
+                    color: '#e2e8f0',
+                    overflowX: 'auto',
+                  }}
+                >
+                  <div style={{ color: '#64748b' }}>// Initialize runtime instance</div>
+                  <div>
+                    <span style={{ color: '#f43f5e' }}>import</span> {'{'} client, deploy {'}'}{' '}
+                    <span style={{ color: '#f43f5e' }}>from</span>{' '}
+                    <span style={{ color: '#38bdf8' }}>'@macsac/studio'</span>;
+                  </div>
+                  <div style={{ marginTop: 8 }}>
+                    <span style={{ color: '#f43f5e' }}>const</span> app ={' '}
+                    <span style={{ color: '#38bdf8' }}>client</span>({'{'}
+                  </div>
+                  <div style={{ paddingLeft: 18 }}>
+                    target: <span style={{ color: '#22c55e' }}>'production'</span>,
+                  </div>
+                  <div style={{ paddingLeft: 18 }}>
+                    region: <span style={{ color: '#22c55e' }}>'global-edge'</span>,
+                  </div>
+                  <div style={{ paddingLeft: 18 }}>
+                    latency: <span style={{ color: '#eab308' }}>'8ms'</span>,
+                  </div>
+                  <div>{'}'});</div>
+                  <div style={{ marginTop: 12, color: '#64748b' }}>// One-click automated deployment</div>
+                  <div>
+                    <span style={{ color: '#f43f5e' }}>await</span> app.
+                    <span style={{ color: '#38bdf8' }}>optimize</span>({'{'} responsive: <span style={{ color: '#f43f5e' }}>true</span> {'}'});
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 18,
+                      padding: '8px 12px',
+                      background: '#1e293b',
+                      borderRadius: 6,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      border: '1px solid #334155',
+                    }}
+                  >
+                    <span style={{ color: '#22c55e' }}>$ npm i @macsac/core --save</span>
+                    <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>READY</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      /* 3. ASYMMETRIC / EDITORIAL HERO (Fashion, Creative Agency, Magazine) */
+      if (section.layoutVariant === 'asymmetric') {
+        return (
+          <section
+            style={{
+              padding: `${paddingY} ${paddingX}`,
+              backgroundColor: section.bgVariant === 'card' ? theme.cardBg : 'transparent',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              {/* Large Top Headline Banner */}
+              <div style={{ marginBottom: isMobile ? 24 : 40, maxWidth: 960 }}>
+                {section.badge && (
+                  <div style={{ marginBottom: 12 }}>
+                    {et('span', 'badge', section.badge, {
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.1em',
+                      color: theme.primaryColor,
+                      borderBottom: `2px solid ${theme.primaryColor}`,
+                      paddingBottom: 4,
+                      display: 'inline-block',
+                    })}
+                  </div>
+                )}
+
+                {et('h1', 'title', section.title, {
+                  fontFamily: theme.headingFont,
+                  fontSize: isMobile
+                    ? 'clamp(2.2rem, 8vw, 2.9rem)'
+                    : isTablet
+                    ? 'clamp(2.8rem, 5.5vw, 3.8rem)'
+                    : 'clamp(3.4rem, 6vw, 4.8rem)',
+                  fontWeight: 900,
+                  lineHeight: 1.05,
+                  letterSpacing: '-0.03em',
+                  color: theme.textColor,
+                  wordBreak: 'break-word',
+                })}
+              </div>
+
+              {/* Staggered Two-Column Layout */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 1fr' : '1fr 1.35fr',
+                  gap: isMobile ? 28 : isTablet ? 32 : 48,
+                  alignItems: 'center',
+                }}
+              >
+                <div>
+                  {section.description &&
+                    et('p', 'description', section.description, {
+                      fontSize: isMobile ? '1rem' : '1.14rem',
+                      color: theme.textMuted,
+                      lineHeight: 1.7,
+                      marginBottom: 28,
+                    })}
+
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                      padding: isMobile ? '12px 24px' : '14px 32px',
+                      fontSize: '0.94rem',
+                    })}
+                    {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                      padding: isMobile ? '12px 20px' : '14px 28px',
+                      fontSize: '0.94rem',
+                    })}
+                  </div>
+                </div>
+
+                {/* Asymmetric Imagery */}
+                {section.image && (
+                  <div style={{ position: 'relative', width: '100%', marginBottom: isMobile ? 24 : 0 }}>
+                    {eimg(section.image, section.imageAlt || section.title, {
+                      width: '100%',
+                      height: isMobile ? 280 : isTablet ? 360 : 440,
+                      objectFit: 'cover',
+                      borderRadius: theme.borderRadius,
+                      boxShadow: '0 24px 60px rgba(0,0,0,0.18)',
+                    })}
+                    <div
+                      style={{
+                        position: 'absolute',
+                        bottom: -16,
+                        left: isMobile ? 12 : -20,
+                        background: theme.cardBg,
+                        border: `1px solid ${theme.borderColor}`,
+                        padding: '12px 18px',
+                        borderRadius: theme.borderRadius,
+                        boxShadow: '0 12px 30px rgba(0,0,0,0.12)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                      }}
+                    >
+                      <Sparkles size={18} color={theme.primaryColor} />
+                      <span style={{ fontSize: '0.84rem', fontWeight: 700, color: theme.textColor }}>
+                        Featured Work 2026
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      /* 4. BENTO HERO (AI Platform, SaaS Product, Modern App) */
+      if (section.layoutVariant === 'bento') {
+        return (
+          <section
+            style={{
+              padding: `${paddingY} ${paddingX}`,
+              backgroundColor: section.bgVariant === 'card' ? theme.cardBg : 'transparent',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', maxWidth: 840, margin: '0 auto 36px' }}>
+                {section.badge && (
+                  <div style={{ marginBottom: 12 }}>
+                    {et('span', 'badge', section.badge, {
+                      fontSize: '0.78rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      padding: '5px 14px',
+                      borderRadius: 9999,
+                      background: `${theme.primaryColor}16`,
+                      color: theme.primaryColor,
+                      border: `1px solid ${theme.primaryColor}33`,
+                    })}
+                  </div>
+                )}
+
+                {et('h1', 'title', section.title, {
+                  fontFamily: theme.headingFont,
+                  fontSize: isMobile
+                    ? 'clamp(2.1rem, 7.5vw, 2.7rem)'
+                    : isTablet
+                    ? 'clamp(2.4rem, 4.8vw, 3.2rem)'
+                    : 'clamp(2.8rem, 5vw, 4.2rem)',
+                  fontWeight: 800,
+                  lineHeight: 1.12,
+                  marginBottom: 16,
+                  color: theme.textColor,
+                })}
+
+                {section.description &&
+                  et('p', 'description', section.description, {
+                    fontSize: isMobile ? '0.98rem' : '1.12rem',
+                    color: theme.textMuted,
+                    lineHeight: 1.6,
+                    marginBottom: 24,
+                  })}
+
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+                  {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                    padding: '13px 30px',
+                    fontSize: '0.95rem',
+                  })}
+                  {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                    padding: '13px 26px',
+                    fontSize: '0.95rem',
+                  })}
+                </div>
+              </div>
+
+              {/* Bento Feature Grid */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 1fr' : '1.6fr 1fr 1fr',
+                  gap: 18,
+                }}
+              >
+                {/* Large Preview Bento Box */}
+                {section.image && (
+                  <div
+                    style={{
+                      gridColumn: isTablet ? 'span 2' : undefined,
+                      background: theme.cardBg,
+                      border: `1px solid ${theme.borderColor}`,
+                      borderRadius: theme.borderRadius,
+                      padding: 20,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+                      <span style={{ fontSize: '0.8rem', fontWeight: 700, color: theme.primaryColor }}>
+                        LIVE PREVIEW
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: theme.textMuted }}>Synced with Engine</span>
+                    </div>
+                    {eimg(section.image, section.imageAlt || section.title, {
+                      width: '100%',
+                      maxHeight: isMobile ? 220 : 260,
+                      objectFit: 'cover',
+                      borderRadius: 8,
+                    })}
+                  </div>
+                )}
+
+                {/* Metric Bento Box */}
+                <div
+                  style={{
+                    background: theme.cardBg,
+                    border: `1px solid ${theme.borderColor}`,
+                    borderRadius: theme.borderRadius,
+                    padding: '24px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 10,
+                      background: `${theme.primaryColor}16`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: theme.primaryColor,
+                      marginBottom: 16,
+                    }}
+                  >
+                    <Zap size={22} />
+                  </div>
+                  <div style={{ fontSize: '2.2rem', fontWeight: 800, color: theme.textColor, letterSpacing: '-0.02em' }}>
+                    99.98%
+                  </div>
+                  <div style={{ fontSize: '0.94rem', fontWeight: 700, color: theme.textColor, marginTop: 4 }}>
+                    Performance Reliability
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: theme.textMuted, marginTop: 6, lineHeight: 1.5 }}>
+                    Sub-millisecond global execution powered by real-time distribution.
+                  </div>
+                </div>
+
+                {/* Security / Badge Bento Box */}
+                <div
+                  style={{
+                    background: theme.cardBg,
+                    border: `1px solid ${theme.borderColor}`,
+                    borderRadius: theme.borderRadius,
+                    padding: '24px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 10,
+                      background: `${theme.primaryColor}16`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: theme.primaryColor,
+                      marginBottom: 16,
+                    }}
+                  >
+                    <Shield size={22} />
+                  </div>
+                  <div style={{ fontSize: '2.2rem', fontWeight: 800, color: theme.textColor, letterSpacing: '-0.02em' }}>
+                    Enterprise
+                  </div>
+                  <div style={{ fontSize: '0.94rem', fontWeight: 700, color: theme.textColor, marginTop: 4 }}>
+                    End-to-End Encryption
+                  </div>
+                  <div style={{ fontSize: '0.82rem', color: theme.textMuted, marginTop: 6, lineHeight: 1.5 }}>
+                    Zero-trust architecture with certified SOC2 & GDPR compliance.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      /* 5. NEO-BRUTALIST HERO (Bold, high-contrast, raw typography) */
+      if (section.layoutVariant === 'neo-brutalist') {
+        const bruteBg = theme.mode === 'dark' ? '#0a0a0a' : '#f5f0e8';
+        const bruteAccent = theme.primaryColor;
+        const bruteText = theme.mode === 'dark' ? '#ffffff' : '#0a0a0a';
+        const bruteMuted = theme.mode === 'dark' ? '#d4d4d8' : '#3f3f46';
+        return (
+          <section
+            style={{
+              backgroundColor: bruteBg,
+              color: bruteText,
+              boxSizing: 'border-box',
+              overflow: 'hidden',
+              position: 'relative',
+              minHeight: isMobile || isTablet ? 'auto' : '85vh',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            {/* Thick top accent bar */}
+            <div style={{ height: 8, backgroundColor: bruteAccent, width: '100%' }} />
+
+            <div
+              style={{
+                flex: 1,
+                display: 'grid',
+                gridTemplateColumns: isMobile || isTablet ? '1fr' : '1fr 1fr',
+                minHeight: isMobile || isTablet ? 'auto' : 'calc(85vh - 8px)',
+              }}
+            >
+              {/* Left: Raw Typography Block */}
+              <div
+                style={{
+                  padding: isMobile ? '36px 18px' : isTablet ? '48px 32px' : '80px 56px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  borderRight: isMobile || isTablet ? 'none' : `4px solid ${bruteAccent}`,
+                  borderBottom: isMobile || isTablet ? `4px solid ${bruteAccent}` : 'none',
+                }}
+              >
+                {section.badge && (
+                  <div
+                    style={{
+                      display: 'inline-block',
+                      fontFamily: 'monospace',
+                      fontSize: '0.75rem',
+                      fontWeight: 900,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.15em',
+                      color: bruteAccent,
+                      border: `2px solid ${bruteAccent}`,
+                      padding: '4px 12px',
+                      marginBottom: 20,
+                      width: 'fit-content',
+                    }}
+                  >
+                    {section.badge}
+                  </div>
+                )}
+                {et('h1', 'title', section.title, {
+                  fontFamily: theme.headingFont,
+                  fontSize: isMobile
+                    ? 'clamp(2.3rem, 8.5vw, 3rem)'
+                    : isTablet
+                    ? 'clamp(2.8rem, 5.5vw, 3.8rem)'
+                    : 'clamp(3.8rem, 6.5vw, 5.8rem)',
+                  fontWeight: 900,
+                  lineHeight: 1.0,
+                  letterSpacing: '-0.04em',
+                  color: bruteText,
+                  textTransform: 'uppercase',
+                  marginBottom: 24,
+                  wordBreak: 'break-word',
+                  overflowWrap: 'break-word',
+                })}
+                {section.description &&
+                  et('p', 'description', section.description, {
+                    fontSize: isMobile ? '0.98rem' : '1.15rem',
+                    color: bruteMuted,
+                    lineHeight: 1.6,
+                    marginBottom: 32,
+                    maxWidth: 480,
+                    fontFamily: 'monospace',
+                  })}
+                <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                  {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                    padding: isMobile ? '13px 26px' : '16px 40px',
+                    fontSize: '0.95rem',
+                    fontWeight: 900,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    borderRadius: '0px',
+                    boxShadow: `4px 4px 0 ${bruteAccent}`,
+                  })}
+                  {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                    padding: isMobile ? '13px 22px' : '16px 32px',
+                    fontSize: '0.95rem',
+                    fontWeight: 900,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.08em',
+                    borderRadius: '0px',
+                    border: `2px solid ${bruteText}`,
+                    color: bruteText,
+                    background: 'transparent',
+                  })}
+                </div>
+              </div>
+
+              {/* Right: Bold Image with number accent */}
+              {section.image && (
+                <div style={{ position: 'relative', minHeight: isMobile ? 260 : isTablet ? 360 : 'auto', overflow: 'hidden' }}>
+                  {eimg(section.image, section.imageAlt || section.title, {
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  })}
+                  {/* Bold "01" accent overlay */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      fontSize: 'clamp(5rem, 12vw, 10rem)',
+                      fontWeight: 900,
+                      fontFamily: theme.headingFont,
+                      color: 'rgba(255,255,255,0.12)',
+                      lineHeight: 1,
+                      userSelect: 'none',
+                      pointerEvents: 'none',
+                      padding: '0 20px 0',
+                    }}
+                  >
+                    01
+                  </div>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: 8,
+                      backgroundColor: bruteAccent,
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      }
+
+      /* 6. PORTRAIT HERO (Luxury fashion, photography — full-height portrait image left) */
+      if (section.layoutVariant === 'portrait') {
+        return (
+          <section
+            style={{
+              boxSizing: 'border-box',
+              overflow: 'hidden',
+              position: 'relative',
+              display: 'grid',
+              gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 1.2fr' : '1fr 1.4fr',
+              minHeight: isMobile ? 'auto' : '92vh',
+            }}
+          >
+            {/* Left: Tall Portrait Image */}
+            <div
+              style={{
+                position: 'relative',
+                minHeight: isMobile ? 340 : 'auto',
+                overflow: 'hidden',
+                order: isMobile ? 1 : 0,
+              }}
+            >
+              {section.image && (
+                <>
+                  {eimg(section.image, section.imageAlt || section.title, {
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  })}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      background: 'linear-gradient(to right, rgba(0,0,0,0) 70%, rgba(0,0,0,0.15) 100%)',
+                    }}
+                  />
+                </>
+              )}
+              {/* Sideways text label */}
+              {!isMobile && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 40,
+                    left: -24,
+                    transform: 'rotate(-90deg)',
+                    transformOrigin: 'center center',
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.2em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.7)',
+                    fontFamily: 'monospace',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {section.badge || 'PORTFOLIO 2026'}
+                </div>
+              )}
+            </div>
+
+            {/* Right: Typography block */}
+            <div
+              style={{
+                padding: isMobile ? '40px 24px' : isTablet ? '60px 40px' : '80px 64px',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                backgroundColor: theme.bgColor,
+                order: isMobile ? 0 : 1,
+              }}
+            >
+              {section.badge && (
+                <div
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.14em',
+                    color: theme.primaryColor,
+                    marginBottom: 16,
+                  }}
+                >
+                  {section.badge}
+                </div>
+              )}
+              {et('h1', 'title', section.title, {
+                fontFamily: theme.headingFont,
+                fontSize: isMobile
+                  ? 'clamp(2.1rem, 7.5vw, 2.8rem)'
+                  : isTablet
+                  ? 'clamp(2.6rem, 4.8vw, 3.4rem)'
+                  : 'clamp(3rem, 5vw, 4.5rem)',
+                fontWeight: 800,
+                lineHeight: 1.1,
+                letterSpacing: '-0.025em',
+                color: theme.textColor,
+                marginBottom: 20,
+              })}
+              <div
+                style={{
+                  width: 48,
+                  height: 3,
+                  backgroundColor: theme.primaryColor,
+                  marginBottom: 24,
+                }}
+              />
+              {section.description &&
+                et('p', 'description', section.description, {
+                  fontSize: isMobile ? '0.98rem' : '1.1rem',
+                  color: theme.textMuted,
+                  lineHeight: 1.7,
+                  marginBottom: 32,
+                  maxWidth: 420,
+                })}
+              <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                  padding: isMobile ? '12px 26px' : '14px 34px',
+                  fontSize: '0.94rem',
+                })}
+                {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                  padding: isMobile ? '12px 22px' : '14px 28px',
+                  fontSize: '0.94rem',
+                })}
+              </div>
+
+              {/* Stats row at bottom */}
+              {section.items && section.items.length > 0 && (
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: isMobile ? 20 : 32,
+                    marginTop: isMobile ? 24 : 48,
+                    paddingTop: isMobile ? 20 : 32,
+                    borderTop: `1px solid ${theme.borderColor}`,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  {section.items.slice(0, 3).map((stat) => (
+                    <div key={stat.id}>
+                      <div
+                        style={{
+                          fontFamily: theme.headingFont,
+                          fontSize: '1.6rem',
+                          fontWeight: 800,
+                          color: theme.primaryColor,
+                          letterSpacing: '-0.02em',
+                        }}
+                      >
+                        {stat.title}
+                      </div>
+                      <div style={{ fontSize: '0.78rem', color: theme.textMuted, fontWeight: 600, marginTop: 2 }}>
+                        {stat.subtitle}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      }
+
+      /* 7. SWISS / EDITORIAL GRID HERO (grid-based, structured, type-led) */
+      if (section.layoutVariant === 'swiss') {
+        const isDark = theme.mode === 'dark';
+        return (
+          <section
+            style={{
+              padding: isMobile ? '48px 20px 40px' : isTablet ? '64px 32px 52px' : '80px 48px 72px',
+              backgroundColor: isDark ? '#0e0e0e' : '#f8f8f6',
+              boxSizing: 'border-box',
+              borderBottom: `1px solid ${theme.borderColor}`,
+            }}
+          >
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              {/* Top rule + badge */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 16,
+                  marginBottom: isMobile ? 32 : 52,
+                  paddingBottom: 18,
+                  borderBottom: `2px solid ${isDark ? '#2a2a2a' : '#e0e0e0'}`,
+                }}
+              >
+                {section.badge && (
+                  <span
+                    style={{
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.18em',
+                      color: theme.primaryColor,
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    {section.badge}
+                  </span>
+                )}
+                <div style={{ flex: 1, height: 1, backgroundColor: theme.borderColor }} />
+                <span
+                  style={{
+                    fontSize: '0.7rem',
+                    fontWeight: 700,
+                    color: theme.textMuted,
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.1em',
+                  }}
+                >
+                  VOL. 01 // 2026
+                </span>
+              </div>
+
+              {/* Main grid: huge left title + right content */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr' : '5fr 3fr',
+                  gap: isMobile ? 32 : 60,
+                  alignItems: 'end',
+                }}
+              >
+                <div>
+                  {et('h1', 'title', section.title, {
+                    fontFamily: theme.headingFont,
+                    fontSize: isMobile
+                      ? 'clamp(2.6rem, 10vw, 3.5rem)'
+                      : isTablet
+                      ? 'clamp(3.5rem, 7vw, 5rem)'
+                      : 'clamp(4rem, 7.5vw, 7.5rem)',
+                    fontWeight: 900,
+                    lineHeight: 0.95,
+                    letterSpacing: '-0.04em',
+                    color: isDark ? '#ffffff' : '#0a0a0a',
+                    textTransform: 'uppercase',
+                    wordBreak: 'break-word',
+                    marginBottom: 0,
+                  })}
+                </div>
+
+                <div
+                  style={{
+                    paddingLeft: isMobile ? 0 : 32,
+                    borderLeft: isMobile ? 'none' : `2px solid ${theme.primaryColor}`,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'flex-end',
+                    gap: 20,
+                  }}
+                >
+                  {section.description &&
+                    et('p', 'description', section.description, {
+                      fontSize: isMobile ? '0.96rem' : '1.04rem',
+                      color: isDark ? '#d4d4d8' : '#3f3f46',
+                      lineHeight: 1.7,
+                    })}
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                      padding: '12px 28px',
+                      fontSize: '0.9rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      borderRadius: '0px',
+                    })}
+                    {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                      padding: '12px 24px',
+                      fontSize: '0.9rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.06em',
+                      borderRadius: '0px',
+                      border: `1px solid ${isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)'}`,
+                      color: isDark ? '#ffffff' : '#0a0a0a',
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Bottom horizontal image strip */}
+              {section.image && (
+                <div
+                  style={{
+                    marginTop: isMobile ? 36 : 56,
+                    height: isMobile ? 200 : isTablet ? 280 : 360,
+                    overflow: 'hidden',
+                    position: 'relative',
+                  }}
+                >
+                  {eimg(section.image, section.imageAlt || section.title, {
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                    filter: isDark ? 'brightness(0.7) saturate(0.9)' : 'none',
+                  })}
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      }
+
+      /* 8. TYPOGRAPHIC STATEMENT HERO (pure type, no image, oversized text) */
+      if (section.layoutVariant === 'typographic') {
+        const isDark = theme.mode === 'dark';
+        const bg = isDark ? '#050505' : '#ffffff';
+        const fg = isDark ? '#ffffff' : '#050505';
+        return (
+          <section
+            style={{
+              padding: isMobile ? '60px 20px 50px' : isTablet ? '80px 40px' : '100px 64px 90px',
+              backgroundColor: bg,
+              boxSizing: 'border-box',
+              position: 'relative',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Background typographic watermark */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                fontSize: 'clamp(8rem, 25vw, 20rem)',
+                fontWeight: 900,
+                fontFamily: theme.headingFont,
+                color: 'transparent',
+                WebkitTextStroke: isDark ? '1px rgba(255,255,255,0.04)' : '1px rgba(0,0,0,0.05)',
+                userSelect: 'none',
+                pointerEvents: 'none',
+                whiteSpace: 'nowrap',
+                zIndex: 0,
+              }}
+            >
+              {section.badge?.split(' ')[0] || 'DESIGN'}
+            </div>
+
+            <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+              {section.badge && (
+                <div
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.22em',
+                    color: theme.primaryColor,
+                    marginBottom: 32,
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {section.badge}
+                </div>
+              )}
+
+              {et('h1', 'title', section.title, {
+                fontFamily: theme.headingFont,
+                fontSize: isMobile
+                  ? 'clamp(3rem, 10vw, 4rem)'
+                  : isTablet
+                  ? 'clamp(4rem, 8vw, 5.5rem)'
+                  : 'clamp(4.5rem, 8vw, 8rem)',
+                fontWeight: 900,
+                lineHeight: 1.0,
+                letterSpacing: '-0.04em',
+                color: fg,
+                marginBottom: 36,
+                wordBreak: 'break-word',
+              })}
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+                  gap: isMobile ? 24 : 56,
+                  paddingTop: 32,
+                  borderTop: `1px solid ${isDark ? '#222' : '#e0e0e0'}`,
+                }}
+              >
+                {section.description &&
+                  et('p', 'description', section.description, {
+                    fontSize: isMobile ? '0.98rem' : '1.14rem',
+                    color: isDark ? '#d4d4d8' : '#4b5563',
+                    lineHeight: 1.7,
+                  })}
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 14,
+                    alignItems: 'flex-start',
+                    flexWrap: 'wrap',
+                    justifyContent: isMobile ? 'flex-start' : 'flex-end',
+                  }}
+                >
+                  {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                    padding: '14px 36px',
+                    fontSize: '0.94rem',
+                    fontWeight: 700,
+                  })}
+                  {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                    padding: '14px 28px',
+                    fontSize: '0.94rem',
+                    border: `1px solid ${isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)'}`,
+                    color: fg,
+                  })}
+                </div>
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      /* 9. ORGANIC HERO (natural, earthy, flowing — for wellness, food, nature brands) */
+      if (section.layoutVariant === 'organic') {
+        return (
+          <section
+            style={{
+              padding: isMobile ? '0' : '0',
+              backgroundColor: theme.bgColor,
+              boxSizing: 'border-box',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile || isTablet ? '1fr' : '1.2fr 1fr',
+                minHeight: isMobile || isTablet ? 'auto' : '88vh',
+              }}
+            >
+              {/* Left: Warm content area */}
+              <div
+                style={{
+                  padding: isMobile ? '56px 24px 48px' : isTablet ? '56px 36px 44px' : '100px 72px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  background: theme.bgColor,
+                }}
+              >
+                {section.badge && (
+                  <div
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8,
+                      marginBottom: 24,
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: 24,
+                        height: 2,
+                        backgroundColor: theme.primaryColor,
+                        display: 'inline-block',
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: '0.78rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.12em',
+                        color: theme.primaryColor,
+                      }}
+                    >
+                      {section.badge}
+                    </span>
+                  </div>
+                )}
+                {et('h1', 'title', section.title, {
+                  fontFamily: theme.headingFont,
+                  fontSize: isMobile
+                    ? 'clamp(2.2rem, 8vw, 3rem)'
+                    : isTablet
+                    ? 'clamp(2.4rem, 4.8vw, 3.2rem)'
+                    : 'clamp(3rem, 5.5vw, 4.5rem)',
+                  fontWeight: 800,
+                  lineHeight: 1.15,
+                  letterSpacing: '-0.025em',
+                  color: theme.textColor,
+                  marginBottom: 20,
+                })}
+                {section.description &&
+                  et('p', 'description', section.description, {
+                    fontSize: isMobile ? '1rem' : '1.12rem',
+                    color: theme.textMuted,
+                    lineHeight: 1.75,
+                    marginBottom: 36,
+                    maxWidth: isMobile || isTablet ? '100%' : 440,
+                  })}
+                <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                  {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                    padding: isMobile ? '13px 28px' : '15px 36px',
+                    fontSize: '0.96rem',
+                    borderRadius: '9999px',
+                  })}
+                  {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                    padding: isMobile ? '13px 22px' : '15px 28px',
+                    fontSize: '0.96rem',
+                    borderRadius: '9999px',
+                  })}
+                </div>
+              </div>
+
+              {/* Right: Rich full-bleed image */}
+              {section.image && (
+                <div
+                  style={{
+                    position: 'relative',
+                    minHeight: isMobile ? 320 : isTablet ? 380 : 'auto',
+                    overflow: 'hidden',
+                  }}
+                >
+                  {eimg(section.image, section.imageAlt || section.title, {
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  })}
+                  {/* Organic shape overlay */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: -1,
+                      width: isMobile || isTablet ? '100%' : '80px',
+                      height: isMobile || isTablet ? '40px' : '100%',
+                      background: isMobile || isTablet
+                        ? theme.bgColor
+                        : 'none',
+                      zIndex: 1,
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      }
+
+      /* 10. MAGAZINE COVER HERO (editorial, horizontal rule layout, large issue number) */
+      if (section.layoutVariant === 'magazine-cover') {
+        const isDark = theme.mode === 'dark';
+        return (
+          <section
+            style={{
+              backgroundColor: isDark ? '#0c0c0c' : '#f9f7f4',
+              boxSizing: 'border-box',
+              overflow: 'hidden',
+              position: 'relative',
+              minHeight: isMobile ? 'auto' : '90vh',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            {/* Magazine masthead bar */}
+            <div
+              style={{
+                padding: isMobile ? '12px 20px' : '14px 48px',
+                borderBottom: `1px solid ${isDark ? '#2a2a2a' : '#e0ddd6'}`,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: theme.headingFont,
+                  fontSize: isMobile ? '1.1rem' : '1.3rem',
+                  fontWeight: 900,
+                  letterSpacing: '-0.02em',
+                  color: isDark ? '#ffffff' : '#0a0a0a',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {section.badge?.split('//')[0]?.trim() || 'THE JOURNAL'}
+              </span>
+              <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    color: theme.textMuted,
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.1em',
+                  }}
+                >
+                  EST. 2024
+                </span>
+                <span
+                  style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    color: theme.primaryColor,
+                    fontFamily: 'monospace',
+                    letterSpacing: '0.1em',
+                  }}
+                >
+                  ISSUE 12
+                </span>
+              </div>
+            </div>
+
+            {/* Main cover layout */}
+            <div
+              style={{
+                flex: 1,
+                display: 'grid',
+                gridTemplateColumns: isMobile || isTablet ? '1fr' : '1fr 1fr',
+                position: 'relative',
+              }}
+            >
+              {/* Left: Cover story text */}
+              <div
+                style={{
+                  padding: isMobile ? '36px 18px 40px' : isTablet ? '48px 32px' : '72px 64px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  zIndex: 1,
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontSize: '0.7rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.16em',
+                      color: theme.primaryColor,
+                      marginBottom: 16,
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    COVER STORY
+                  </div>
+                  {et('h1', 'title', section.title, {
+                    fontFamily: theme.headingFont,
+                    fontSize: isMobile
+                      ? 'clamp(2.2rem, 8vw, 3rem)'
+                      : isTablet
+                      ? 'clamp(2.8rem, 5.5vw, 3.8rem)'
+                      : 'clamp(3rem, 5.5vw, 4.8rem)',
+                    fontWeight: 900,
+                    lineHeight: 1.08,
+                    letterSpacing: '-0.03em',
+                    color: isDark ? '#ffffff' : '#0a0a0a',
+                    marginBottom: 20,
+                    wordBreak: 'break-word',
+                  })}
+                  {section.description &&
+                    et('p', 'description', section.description, {
+                      fontSize: isMobile ? '0.98rem' : '1.05rem',
+                      color: isDark ? '#d4d4d8' : '#3f3f46',
+                      lineHeight: 1.7,
+                      marginBottom: 32,
+                      maxWidth: 480,
+                    })}
+                  <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                    {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                      padding: '13px 30px',
+                      fontSize: '0.92rem',
+                      fontWeight: 700,
+                    })}
+                    {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                      padding: '13px 24px',
+                      fontSize: '0.92rem',
+                      border: `1px solid ${isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)'}`,
+                      color: isDark ? '#ffffff' : '#0a0a0a',
+                    })}
+                  </div>
+                </div>
+
+                {/* Issue meta row at bottom */}
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 24,
+                    alignItems: 'center',
+                    paddingTop: 32,
+                    marginTop: 40,
+                    borderTop: `1px solid ${isDark ? '#2a2a2a' : '#e0ddd6'}`,
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  {['LONGFORM', 'INTERVIEWS', 'ESSAYS', 'CULTURE'].map((tag) => (
+                    <span
+                      key={tag}
+                      style={{
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        letterSpacing: '0.12em',
+                        color: theme.textMuted,
+                        textTransform: 'uppercase',
+                        fontFamily: 'monospace',
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Right: Cover image */}
+              {section.image && (
+                <div style={{ position: 'relative', minHeight: isMobile ? 320 : 'auto', overflow: 'hidden' }}>
+                  {eimg(section.image, section.imageAlt || section.title, {
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                    filter: isDark ? 'brightness(0.8)' : 'none',
+                  })}
+                  {/* Issue number watermark */}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 20,
+                      right: 20,
+                      fontFamily: theme.headingFont,
+                      fontSize: 'clamp(4rem, 10vw, 7rem)',
+                      fontWeight: 900,
+                      color: 'rgba(255,255,255,0.12)',
+                      lineHeight: 1,
+                      userSelect: 'none',
+                    }}
+                  >
+                    12
+                  </div>
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      }
+
+      /* 11. ARCHITECT / DIAGONAL HERO (Angular sections, strong geometry) */
+      if (section.layoutVariant === 'architect' || section.layoutVariant === 'diagonal') {
+        const isDark = theme.mode === 'dark';
+        const archBg = isDark ? '#0d0d0d' : '#f4f3f0';
+        return (
+          <section
+            style={{
+              backgroundColor: archBg,
+              boxSizing: 'border-box',
+              position: 'relative',
+              overflow: 'hidden',
+              minHeight: isMobile ? 'auto' : '88vh',
+            }}
+          >
+            {/* Diagonal background accent */}
+            <div
+              style={{
+                position: 'absolute',
+                top: 0,
+                right: 0,
+                width: isMobile ? '60%' : '45%',
+                height: '100%',
+                backgroundColor: theme.primaryColor,
+                clipPath: isMobile
+                  ? 'polygon(20% 0, 100% 0, 100% 100%, 0 100%)'
+                  : 'polygon(15% 0, 100% 0, 100% 100%, 0 100%)',
+                zIndex: 0,
+                opacity: 0.08,
+              }}
+            />
+            {/* Strong right panel */}
+            {section.image && !isMobile && !isTablet && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  width: '42%',
+                  height: '100%',
+                  overflow: 'hidden',
+                  zIndex: 0,
+                  clipPath: 'polygon(12% 0, 100% 0, 100% 100%, 0 100%)',
+                }}
+              >
+                <img
+                  src={section.image}
+                  alt={section.imageAlt || section.title}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', filter: 'brightness(0.72) saturate(0.9)' }}
+                />
+              </div>
+            )}
+
+            <div
+              style={{
+                position: 'relative',
+                zIndex: 1,
+                maxWidth: 1200,
+                margin: '0 auto',
+                padding: isMobile ? '48px 18px 40px' : isTablet ? '60px 32px 48px' : '110px 64px',
+                width: isMobile || isTablet ? '100%' : '58%',
+                boxSizing: 'border-box',
+              }}
+            >
+              {section.badge && (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    marginBottom: 24,
+                  }}
+                >
+                  <div style={{ width: 36, height: 2, backgroundColor: theme.primaryColor }} />
+                  <span
+                    style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.16em',
+                      color: theme.primaryColor,
+                    }}
+                  >
+                    {section.badge}
+                  </span>
+                </div>
+              )}
+
+              {et('h1', 'title', section.title, {
+                fontFamily: theme.headingFont,
+                fontSize: isMobile
+                  ? 'clamp(2.1rem, 7.5vw, 2.8rem)'
+                  : isTablet
+                  ? 'clamp(2.6rem, 5vw, 3.4rem)'
+                  : 'clamp(3.5rem, 6.5vw, 5.5rem)',
+                fontWeight: 900,
+                lineHeight: 1.05,
+                letterSpacing: '-0.03em',
+                color: isDark ? '#ffffff' : '#0a0a0a',
+                marginBottom: 20,
+                wordBreak: 'break-word',
+              })}
+
+              {section.description &&
+                et('p', 'description', section.description, {
+                  fontSize: isMobile ? '0.98rem' : '1.08rem',
+                  color: isDark ? '#d4d4d8' : '#3f3f46',
+                  lineHeight: 1.7,
+                  marginBottom: 32,
+                  maxWidth: 500,
+                })}
+
+              <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                  padding: '14px 34px',
+                  fontSize: '0.94rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                })}
+                {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                  padding: '14px 28px',
+                  fontSize: '0.94rem',
+                  border: `1px solid ${isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.3)'}`,
+                  color: isDark ? '#ffffff' : '#0a0a0a',
+                })}
+              </div>
+
+              {/* Mobile/Tablet image below */}
+              {(isMobile || isTablet) && section.image && (
+                <div style={{ marginTop: 32, borderRadius: theme.borderRadius, overflow: 'hidden', height: isMobile ? 260 : 360 }}>
+                  <img
+                    src={section.image}
+                    alt={section.imageAlt || section.title}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  />
+                </div>
+              )}
+            </div>
+          </section>
+        );
+      }
+
+      /* 12. LUXURY STACKED HERO (centered, stacked, high-end serif typography) */
+      if (section.layoutVariant === 'luxury-stacked') {
+        return (
+          <section
+            style={{
+              padding: 0,
+              backgroundColor: theme.bgColor,
+              boxSizing: 'border-box',
+              overflow: 'hidden',
+              position: 'relative',
+            }}
+          >
+            {/* Full background image with gradient */}
+            {section.image && (
+              <div
+                style={{
+                  position: 'relative',
+                  height: isMobile ? 360 : isTablet ? 480 : 600,
+                  overflow: 'hidden',
+                }}
+              >
+                {eimg(section.image, section.imageAlt || section.title, {
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                })}
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background:
+                      'linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.55) 70%, rgba(0,0,0,0.85) 100%)',
+                    display: 'flex',
+                    alignItems: 'flex-end',
+                    padding: isMobile ? '32px 20px' : '52px 64px',
+                  }}
+                >
+                  {section.badge && (
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.18em',
+                        color: 'rgba(255,255,255,0.75)',
+                        fontFamily: 'monospace',
+                      }}
+                    >
+                      {section.badge}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Stacked content below image */}
+            <div
+              style={{
+                padding: isMobile ? '40px 20px 52px' : isTablet ? '52px 48px 64px' : '64px 80px 80px',
+                maxWidth: 880,
+                margin: '0 auto',
+                textAlign: 'center',
+              }}
+            >
+              {et('h1', 'title', section.title, {
+                fontFamily: theme.headingFont,
+                fontSize: isMobile
+                  ? 'clamp(2.2rem, 8vw, 3rem)'
+                  : isTablet
+                  ? 'clamp(2.8rem, 5vw, 3.8rem)'
+                  : 'clamp(3.2rem, 5.5vw, 5rem)',
+                fontWeight: 700,
+                lineHeight: 1.15,
+                letterSpacing: '-0.025em',
+                color: theme.textColor,
+                marginBottom: 16,
+              })}
+              <div
+                style={{
+                  width: 60,
+                  height: 2,
+                  backgroundColor: theme.primaryColor,
+                  margin: '0 auto 24px',
+                }}
+              />
+              {section.description &&
+                et('p', 'description', section.description, {
+                  fontSize: isMobile ? '1rem' : '1.15rem',
+                  color: theme.textMuted,
+                  lineHeight: 1.75,
+                  marginBottom: 36,
+                })}
+              <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap' }}>
+                {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                  padding: isMobile ? '14px 30px' : '16px 42px',
+                  fontSize: '0.96rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.04em',
+                })}
+                {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                  padding: isMobile ? '14px 26px' : '16px 36px',
+                  fontSize: '0.96rem',
+                })}
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      /* 5. MINIMAL / BRUTALIST HERO (Personal Branding, Indie Creator) */
+      if (section.layoutVariant === 'minimal') {
+        return (
+          <section
+            style={{
+              padding: `${paddingY} ${paddingX}`,
+              backgroundColor: section.bgVariant === 'card' ? theme.cardBg : 'transparent',
+              boxSizing: 'border-box',
+              borderBottom: `2px solid ${theme.borderColor}`,
+            }}
+          >
+            <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+              {section.badge && (
+                <div style={{ marginBottom: 14 }}>
+                  {et('span', 'badge', section.badge, {
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                    color: theme.primaryColor,
+                    letterSpacing: '0.1em',
+                  })}
+                </div>
+              )}
+
+              {et('h1', 'title', section.title, {
+                fontFamily: theme.headingFont,
+                fontSize: isMobile
+                  ? 'clamp(2.3rem, 9vw, 3.2rem)'
+                  : isTablet
+                  ? 'clamp(3rem, 6vw, 4.2rem)'
+                  : 'clamp(3.6rem, 6.5vw, 5.2rem)',
+                fontWeight: 900,
+                lineHeight: 1.05,
+                letterSpacing: '-0.035em',
+                marginBottom: 24,
+                color: theme.textColor,
+              })}
+
+              {section.description &&
+                et('p', 'description', section.description, {
+                  fontSize: isMobile ? '1.05rem' : '1.25rem',
+                  color: theme.textMuted,
+                  lineHeight: 1.6,
+                  marginBottom: 32,
+                  maxWidth: 720,
+                })}
+
+              <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+                {ebtn(section.primaryBtn, true, 'primaryBtn', {
+                  padding: isMobile ? '13px 26px' : '15px 36px',
+                  fontSize: '0.98rem',
+                })}
+                {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
+                  padding: isMobile ? '13px 24px' : '15px 32px',
+                  fontSize: '0.98rem',
+                })}
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      /* 6. STANDARD CENTERED / SPLIT HERO (Default Fallback) */
       return (
         <section
           style={{
@@ -1433,10 +3333,10 @@ function renderSectionContent(p: SectionRendererParams) {
                 isMobile || section.layoutVariant === 'centered'
                   ? undefined
                   : isTablet
-                  ? 'repeat(auto-fit, minmax(280px, 1fr))'
+                  ? '1fr 1fr'
                   : 'repeat(auto-fit, minmax(320px, 1fr))',
               alignItems: 'center',
-              gap: isMobile ? 24 : isTablet ? 36 : 48,
+              gap: isMobile ? 24 : isTablet ? 32 : 48,
               boxSizing: 'border-box',
             }}
           >
@@ -1467,7 +3367,7 @@ function renderSectionContent(p: SectionRendererParams) {
                 fontSize: isMobile
                   ? 'clamp(1.9rem, 7vw, 2.45rem)'
                   : isTablet
-                  ? 'clamp(2.3rem, 4.5vw, 3rem)'
+                  ? 'clamp(2.2rem, 4.2vw, 2.85rem)'
                   : 'clamp(2.7rem, 5.5vw, 4.1rem)',
                 fontWeight: 800,
                 lineHeight: 1.12,
@@ -1479,7 +3379,7 @@ function renderSectionContent(p: SectionRendererParams) {
 
               {section.description &&
                 et('p', 'description', section.description, {
-                  fontSize: isMobile ? '0.98rem' : isTablet ? '1.08rem' : '1.18rem',
+                  fontSize: isMobile ? '0.98rem' : isTablet ? '1.04rem' : '1.18rem',
                   color: theme.textMuted,
                   lineHeight: 1.6,
                   marginBottom: isMobile ? 24 : 32,
@@ -1498,13 +3398,13 @@ function renderSectionContent(p: SectionRendererParams) {
                 }}
               >
                 {ebtn(section.primaryBtn, true, 'primaryBtn', {
-                  padding: isMobile ? '12px 24px' : '14px 32px',
+                  padding: isMobile ? '12px 24px' : isTablet ? '13px 28px' : '14px 32px',
                   fontSize: isMobile ? '0.92rem' : '0.96rem',
                   width: isMobile ? '100%' : 'auto',
                 })}
 
                 {ebtn(section.secondaryBtn, false, 'secondaryBtn', {
-                  padding: isMobile ? '12px 22px' : '14px 28px',
+                  padding: isMobile ? '12px 22px' : isTablet ? '13px 24px' : '14px 28px',
                   fontSize: isMobile ? '0.92rem' : '0.96rem',
                   width: isMobile ? '100%' : 'auto',
                 })}
@@ -1515,7 +3415,7 @@ function renderSectionContent(p: SectionRendererParams) {
               <div style={{ position: 'relative', width: '100%', boxSizing: 'border-box' }}>
                 {eimg(section.image, section.imageAlt || section.title, {
                   width: '100%',
-                  maxHeight: isMobile ? 280 : isTablet ? 380 : 500,
+                  maxHeight: isMobile ? 280 : isTablet ? 360 : 500,
                   objectFit: 'cover',
                   borderRadius: theme.borderRadius,
                   boxShadow: '0 20px 48px rgba(0,0,0,0.14)',
@@ -1526,6 +3426,7 @@ function renderSectionContent(p: SectionRendererParams) {
           </div>
         </section>
       );
+    }
 
     /* -------------------------------- ABOUT -------------------------------- */
     case 'about':
@@ -1651,7 +3552,225 @@ function renderSectionContent(p: SectionRendererParams) {
 
     /* -------------------------------- SERVICES & FEATURES -------------------------------- */
     case 'services':
-    case 'features':
+    case 'features': {
+      /* 1. BENTO GRID SERVICES */
+      if (section.layoutVariant === 'bento') {
+        const items = section.items || [];
+        const leadItem = items[0];
+        const sideItems = items.slice(1);
+
+        return (
+          <section style={{ padding: `${paddingY} ${paddingX}`, boxSizing: 'border-box' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', maxWidth: 740, margin: `0 auto ${isMobile ? 28 : 44}px` }}>
+                {section.badge &&
+                  et('span', 'badge', section.badge, {
+                    fontSize: '0.75rem',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    color: theme.primaryColor,
+                    letterSpacing: '0.08em',
+                  })}
+                {et('h2', 'title', section.title, {
+                  fontFamily: theme.headingFont,
+                  fontSize: isMobile ? '1.85rem' : 'clamp(2rem, 4vw, 2.8rem)',
+                  fontWeight: 800,
+                  margin: '8px 0 12px',
+                  color: theme.textColor,
+                })}
+                {section.description &&
+                  et('p', 'description', section.description, {
+                    color: theme.textMuted,
+                    fontSize: '1rem',
+                    lineHeight: 1.6,
+                  })}
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 1fr' : '1.35fr 1fr 1fr',
+                  gap: 20,
+                }}
+              >
+                {/* Lead Bento Feature */}
+                {leadItem && (
+                  <div
+                    style={{
+                      background: theme.cardBg,
+                      border: `1px solid ${theme.borderColor}`,
+                      borderRadius: theme.borderRadius,
+                      padding: isMobile ? '24px 20px' : '36px 30px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      justifyContent: 'space-between',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.06)',
+                    }}
+                  >
+                    <div>
+                      <div
+                        style={{
+                          width: 48,
+                          height: 48,
+                          borderRadius: 12,
+                          background: `${theme.primaryColor}18`,
+                          color: theme.primaryColor,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginBottom: 20,
+                        }}
+                      >
+                        {renderIcon(leadItem.icon)}
+                      </div>
+                      {leadItem.tag && (
+                        <span style={{ fontSize: '0.74rem', fontWeight: 800, color: theme.primaryColor, textTransform: 'uppercase' }}>
+                          {leadItem.tag}
+                        </span>
+                      )}
+                      <h3 style={{ fontFamily: theme.headingFont, fontSize: '1.5rem', fontWeight: 800, margin: '8px 0 12px', color: theme.textColor }}>
+                        {leadItem.title}
+                      </h3>
+                      <p style={{ color: theme.textMuted, fontSize: '0.96rem', lineHeight: 1.65 }}>
+                        {leadItem.description}
+                      </p>
+                    </div>
+
+                    {leadItem.image && (
+                      <div style={{ marginTop: 24, borderRadius: 8, overflow: 'hidden' }}>
+                        <img src={leadItem.image} alt={leadItem.title} style={{ width: '100%', height: 180, objectFit: 'cover' }} />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Secondary Bento Boxes */}
+                {sideItems.map((it, idx) => (
+                  <div
+                    key={it.id || idx}
+                    style={{
+                      background: theme.cardBg,
+                      border: `1px solid ${theme.borderColor}`,
+                      borderRadius: theme.borderRadius,
+                      padding: isMobile ? '22px 18px' : '30px 24px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      boxShadow: '0 10px 26px rgba(0,0,0,0.05)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 10,
+                        background: `${theme.primaryColor}14`,
+                        color: theme.primaryColor,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: 16,
+                      }}
+                    >
+                      {renderIcon(it.icon)}
+                    </div>
+                    {it.tag && (
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: theme.primaryColor, textTransform: 'uppercase', marginBottom: 4 }}>
+                        {it.tag}
+                      </span>
+                    )}
+                    <h3 style={{ fontFamily: theme.headingFont, fontSize: '1.2rem', fontWeight: 700, marginBottom: 8, color: theme.textColor }}>
+                      {it.title}
+                    </h3>
+                    <p style={{ color: theme.textMuted, fontSize: '0.9rem', lineHeight: 1.6, flex: 1, marginBottom: 14 }}>
+                      {it.description}
+                    </p>
+                    {it.price && (
+                      <div style={{ fontWeight: 800, color: theme.primaryColor, fontSize: '1rem', marginTop: 'auto' }}>
+                        {it.price}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      /* 2. MINIMAL / EDITORIAL NUMBERED LIST SERVICES */
+      if (section.layoutVariant === 'minimal' || section.layoutVariant === 'editorial') {
+        return (
+          <section style={{ padding: `${paddingY} ${paddingX}`, boxSizing: 'border-box' }}>
+            <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+              <div style={{ marginBottom: isMobile ? 32 : 48, maxWidth: 680 }}>
+                {section.badge && (
+                  <div style={{ marginBottom: 10 }}>
+                    {et('span', 'badge', section.badge, {
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      textTransform: 'uppercase',
+                      color: theme.primaryColor,
+                    })}
+                  </div>
+                )}
+                {et('h2', 'title', section.title, {
+                  fontFamily: theme.headingFont,
+                  fontSize: isMobile ? '1.9rem' : 'clamp(2.1rem, 4vw, 3rem)',
+                  fontWeight: 800,
+                  color: theme.textColor,
+                  marginBottom: 12,
+                })}
+                {section.description &&
+                  et('p', 'description', section.description, {
+                    color: theme.textMuted,
+                    fontSize: '1.04rem',
+                    lineHeight: 1.6,
+                  })}
+              </div>
+
+              {/* Numbered Row Items */}
+              <div style={{ borderTop: `1px solid ${theme.borderColor}` }}>
+                {(section.items || []).map((it, itemIdx) => (
+                  <div
+                    key={it.id}
+                    onClick={() => onSelectItem && onSelectItem(it)}
+                    style={{
+                      padding: isMobile ? '20px 0' : '28px 12px',
+                      borderBottom: `1px solid ${theme.borderColor}`,
+                      display: 'grid',
+                      gridTemplateColumns: isMobile ? '1fr' : isTablet ? '50px 1.2fr 1.8fr auto' : '80px 1.2fr 2fr auto',
+                      gap: isMobile ? 8 : isTablet ? 16 : 24,
+                      alignItems: 'center',
+                      cursor: 'pointer',
+                      transition: 'background 0.15s ease',
+                    }}
+                  >
+                    <span style={{ fontFamily: theme.headingFont, fontSize: '1.15rem', fontWeight: 800, color: theme.primaryColor }}>
+                      {String(itemIdx + 1).padStart(2, '0')}
+                    </span>
+                    <h3 style={{ fontFamily: theme.headingFont, fontSize: '1.22rem', fontWeight: 700, color: theme.textColor }}>
+                      {it.title}
+                    </h3>
+                    <p style={{ color: theme.textMuted, fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>
+                      {it.description}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end' }}>
+                      {it.price && (
+                        <span style={{ fontWeight: 700, color: theme.primaryColor, fontSize: '0.94rem' }}>
+                          {it.price}
+                        </span>
+                      )}
+                      <ArrowRight size={18} color={theme.primaryColor} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      /* 3. DEFAULT GRID CARDS */
       return (
         <section style={{ padding: `${paddingY} ${paddingX}`, boxSizing: 'border-box' }}>
           <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -1738,63 +3857,63 @@ function renderSectionContent(p: SectionRendererParams) {
                       {renderIcon(it.icon)}
                     </div>
 
-                  {it.tag &&
-                    eit(it.id, 'tag', it.tag, 'span', {
-                      fontSize: '0.72rem',
+                    {it.tag &&
+                      eit(it.id, 'tag', it.tag, 'span', {
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: theme.primaryColor,
+                        marginBottom: 6,
+                        textTransform: 'uppercase',
+                      })}
+
+                    {eit(it.id, 'title', it.title, 'h3', {
+                      fontFamily: theme.headingFont,
+                      fontSize: '1.24rem',
                       fontWeight: 700,
-                      color: theme.primaryColor,
-                      marginBottom: 6,
-                      textTransform: 'uppercase',
+                      marginBottom: 8,
+                      color: theme.textColor,
                     })}
 
-                  {eit(it.id, 'title', it.title, 'h3', {
-                    fontFamily: theme.headingFont,
-                    fontSize: '1.24rem',
-                    fontWeight: 700,
-                    marginBottom: 8,
-                    color: theme.textColor,
-                  })}
+                    {it.description &&
+                      eit(it.id, 'description', it.description, 'p', {
+                        color: theme.textMuted,
+                        fontSize: '0.92rem',
+                        lineHeight: 1.6,
+                        flex: 1,
+                        marginBottom: 14,
+                      })}
 
-                  {it.description &&
-                    eit(it.id, 'description', it.description, 'p', {
-                      color: theme.textMuted,
-                      fontSize: '0.92rem',
-                      lineHeight: 1.6,
-                      flex: 1,
-                      marginBottom: 14,
-                    })}
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginTop: 'auto',
-                      paddingTop: 10,
-                    }}
-                  >
-                    {it.price ? (
-                      <span style={{ fontWeight: 800, color: theme.primaryColor, fontSize: '1.05rem' }}>
-                        {it.price}
-                      </span>
-                    ) : (
-                      <span style={{ fontSize: '0.84rem', color: theme.primaryColor, fontWeight: 600 }}>
-                        Learn More
-                      </span>
-                    )}
-                    <ChevronRight size={16} color={theme.primaryColor} />
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: 'auto',
+                        paddingTop: 10,
+                      }}
+                    >
+                      {it.price ? (
+                        <span style={{ fontWeight: 800, color: theme.primaryColor, fontSize: '1.05rem' }}>
+                          {it.price}
+                        </span>
+                      ) : (
+                        <span style={{ fontSize: '0.84rem', color: theme.primaryColor, fontWeight: 600 }}>
+                          Learn More
+                        </span>
+                      )}
+                      <ChevronRight size={16} color={theme.primaryColor} />
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
             </div>
           </div>
         </section>
       );
+    }
 
     /* -------------------------------- PORTFOLIO, SHOP & GALLERY -------------------------------- */
     case 'portfolio': {
-      // Collect tags for live filtering
       const tags = Array.from(
         new Set(
           (section.items || [])
@@ -1808,6 +3927,80 @@ function renderSectionContent(p: SectionRendererParams) {
         return item.tag === activeFilter;
       });
 
+      /* Lookbook / Masonry Layout (Photography, Fashion) */
+      if (section.layoutVariant === 'lookbook' || section.layoutVariant === 'masonry') {
+        return (
+          <section style={{ padding: `${paddingY} ${paddingX}`, backgroundColor: theme.cardBg, boxSizing: 'border-box' }}>
+            <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', maxWidth: 740, margin: `0 auto ${isMobile ? 24 : 36}px` }}>
+                {section.badge && (
+                  <span style={{ fontSize: '0.75rem', fontWeight: 700, color: theme.primaryColor, textTransform: 'uppercase' }}>
+                    {section.badge}
+                  </span>
+                )}
+                <h2 style={{ fontFamily: theme.headingFont, fontSize: isMobile ? '1.8rem' : '2.6rem', fontWeight: 800, margin: '8px 0 12px', color: theme.textColor }}>
+                  {section.title}
+                </h2>
+                {section.description && <p style={{ color: theme.textMuted, fontSize: '0.98rem' }}>{section.description}</p>}
+              </div>
+
+              {/* Staggered Editorial Lookbook Grid */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
+                  gap: 20,
+                }}
+              >
+                {filteredItems.map((it, idx) => (
+                  <div
+                    key={it.id || idx}
+                    onClick={() => onSelectItem && onSelectItem(it)}
+                    style={{
+                      position: 'relative',
+                      borderRadius: theme.borderRadius,
+                      overflow: 'hidden',
+                      height: idx % 3 === 0 ? (isMobile ? 260 : 380) : isMobile ? 240 : 310,
+                      cursor: 'pointer',
+                      boxShadow: '0 12px 30px rgba(0,0,0,0.1)',
+                    }}
+                  >
+                    <img
+                      src={it.image || 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80'}
+                      alt={it.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.4s ease' }}
+                    />
+                    <div
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.1) 60%, transparent 100%)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-end',
+                        padding: '20px',
+                        color: '#ffffff',
+                      }}
+                    >
+                      {it.tag && (
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: theme.primaryColor, textTransform: 'uppercase' }}>
+                          {it.tag}
+                        </span>
+                      )}
+                      <h4 style={{ fontFamily: theme.headingFont, fontSize: '1.18rem', fontWeight: 700, margin: '4px 0 6px' }}>
+                        {it.title}
+                      </h4>
+                      {it.price && <span style={{ fontSize: '0.94rem', fontWeight: 800 }}>{it.price}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      }
+
+      /* Default Grid Portfolio */
       return (
         <section
           style={{
@@ -1933,86 +4126,456 @@ function renderSectionContent(p: SectionRendererParams) {
                   >
                     {renderItemDraggerBadge(it)}
                     {it.image && (
-                    <div style={{ height: isMobile ? 220 : 250, overflow: 'hidden', position: 'relative' }}>
-                      <img
-                        src={it.image}
-                        alt={it.title}
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                      {it.price &&
-                        eit(it.id, 'price', it.price, 'div', {
-                          position: 'absolute',
-                          top: 12,
-                          right: 12,
-                          background: 'rgba(0, 0, 0, 0.75)',
-                          color: '#ffffff',
-                          padding: '4px 10px',
-                          borderRadius: 6,
-                          fontSize: '0.84rem',
+                      <div style={{ height: isMobile ? 220 : 250, overflow: 'hidden', position: 'relative' }}>
+                        <img
+                          src={it.image}
+                          alt={it.title}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                        {it.price &&
+                          eit(it.id, 'price', it.price, 'div', {
+                            position: 'absolute',
+                            top: 12,
+                            right: 12,
+                            background: 'rgba(0, 0, 0, 0.75)',
+                            color: '#ffffff',
+                            padding: '4px 10px',
+                            borderRadius: 6,
+                            fontSize: '0.84rem',
+                            fontWeight: 700,
+                            backdropFilter: 'blur(4px)',
+                          })}
+                      </div>
+                    )}
+
+                    <div style={{ padding: isMobile ? '18px' : '22px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                      {it.tag &&
+                        eit(it.id, 'tag', it.tag, 'span', {
+                          fontSize: '0.72rem',
+                          color: theme.primaryColor,
                           fontWeight: 700,
-                          backdropFilter: 'blur(4px)',
+                          textTransform: 'uppercase',
+                          marginBottom: 4,
                         })}
-                    </div>
-                  )}
 
-                  <div style={{ padding: isMobile ? '18px' : '22px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    {it.tag &&
-                      eit(it.id, 'tag', it.tag, 'span', {
-                        fontSize: '0.72rem',
-                        color: theme.primaryColor,
+                      {eit(it.id, 'title', it.title, 'h3', {
+                        fontFamily: theme.headingFont,
+                        fontSize: '1.24rem',
                         fontWeight: 700,
-                        textTransform: 'uppercase',
-                        marginBottom: 4,
+                        margin: '4px 0 6px',
+                        color: theme.textColor,
                       })}
 
-                    {eit(it.id, 'title', it.title, 'h3', {
-                      fontFamily: theme.headingFont,
-                      fontSize: '1.24rem',
-                      fontWeight: 700,
-                      margin: '4px 0 6px',
-                      color: theme.textColor,
-                    })}
+                      {it.subtitle &&
+                        eit(it.id, 'subtitle', it.subtitle, 'p', {
+                          color: theme.textMuted,
+                          fontSize: '0.9rem',
+                          marginBottom: 12,
+                        })}
 
-                    {it.subtitle &&
-                      eit(it.id, 'subtitle', it.subtitle, 'p', {
-                        color: theme.textMuted,
-                        fontSize: '0.9rem',
-                        marginBottom: 12,
-                      })}
+                      {it.description &&
+                        eit(it.id, 'description', it.description, 'p', {
+                          color: theme.textMuted,
+                          fontSize: '0.88rem',
+                          lineHeight: 1.55,
+                          marginBottom: 16,
+                          flex: 1,
+                        })}
 
-                    {it.description &&
-                      eit(it.id, 'description', it.description, 'p', {
-                        color: theme.textMuted,
-                        fontSize: '0.88rem',
-                        lineHeight: 1.55,
-                        marginBottom: 16,
-                        flex: 1,
-                      })}
-
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        marginTop: 'auto',
-                        paddingTop: 10,
-                        borderTop: `1px solid ${theme.borderColor}`,
-                      }}
-                    >
-                      <span style={{ fontSize: '0.84rem', color: theme.primaryColor, fontWeight: 700 }}>
-                        {it.price ? 'View & Order' : 'View Details'}
-                      </span>
-                      <ArrowRight size={15} color={theme.primaryColor} />
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                          marginTop: 'auto',
+                          paddingTop: 10,
+                          borderTop: `1px solid ${theme.borderColor}`,
+                        }}
+                      >
+                        <span style={{ fontSize: '0.84rem', color: theme.primaryColor, fontWeight: 700 }}>
+                          {it.price ? 'View & Order' : 'View Details'}
+                        </span>
+                        <ArrowRight size={15} color={theme.primaryColor} />
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
             </div>
           </div>
         </section>
       );
     }
+
+    /* -------------------------------- RESTAURANT & CAFÉ MENU -------------------------------- */
+    case 'menu': {
+      const menuCategories = Array.from(
+        new Set((section.items || []).map((it) => it.tag).filter(Boolean))
+      );
+      const activeMenuCat = activeFilter === 'All' && menuCategories[0] ? menuCategories[0] : activeFilter;
+      const displayItems = (section.items || []).filter((it) => {
+        if (!activeMenuCat || activeMenuCat === 'All') return true;
+        return it.tag === activeMenuCat;
+      });
+
+      return (
+        <section style={{ padding: `${paddingY} ${paddingX}`, backgroundColor: theme.cardBg, boxSizing: 'border-box' }}>
+          <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: isMobile ? 28 : 44 }}>
+              {section.badge && (
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: theme.primaryColor, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  {section.badge}
+                </span>
+              )}
+              <h2 style={{ fontFamily: theme.headingFont, fontSize: isMobile ? '2rem' : '2.8rem', fontWeight: 800, margin: '8px 0 12px', color: theme.textColor }}>
+                {section.title}
+              </h2>
+              {section.description && <p style={{ color: theme.textMuted, fontSize: '1rem', maxWidth: 640, margin: '0 auto' }}>{section.description}</p>}
+            </div>
+
+            {/* Menu Category Switcher Tabs */}
+            {menuCategories.length > 1 && (
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 36 }}>
+                {menuCategories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => onSelectFilter(cat as string)}
+                    style={{
+                      padding: '8px 20px',
+                      borderRadius: theme.buttonStyle === 'pill' ? 9999 : theme.borderRadius,
+                      fontSize: '0.88rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      border: `1px solid ${activeMenuCat === cat ? theme.primaryColor : theme.borderColor}`,
+                      background: activeMenuCat === cat ? theme.primaryColor : theme.bgColor,
+                      color: activeMenuCat === cat ? '#ffffff' : theme.textColor,
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Menu Course List */}
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr' : '1fr 1fr', gap: isMobile ? 20 : 32 }}>
+              {displayItems.map((dish) => (
+                <div
+                  key={dish.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: 16,
+                    paddingBottom: 18,
+                    borderBottom: `1px dashed ${theme.borderColor}`,
+                  }}
+                >
+                  {dish.image && (
+                    <img
+                      src={dish.image}
+                      alt={dish.title}
+                      style={{ width: 68, height: 68, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }}
+                    />
+                  )}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+                      <h4 style={{ fontFamily: theme.headingFont, fontSize: '1.14rem', fontWeight: 700, color: theme.textColor }}>
+                        {dish.title}
+                      </h4>
+                      <span style={{ fontWeight: 800, color: theme.primaryColor, fontSize: '1.1rem', marginLeft: 12 }}>
+                        {dish.price}
+                      </span>
+                    </div>
+                    <p style={{ color: theme.textMuted, fontSize: '0.88rem', lineHeight: 1.5, margin: 0 }}>
+                      {dish.description}
+                    </p>
+                    {dish.subtitle && (
+                      <span style={{ display: 'inline-block', marginTop: 4, fontSize: '0.74rem', color: theme.primaryColor, fontWeight: 600 }}>
+                        {dish.subtitle}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    /* -------------------------------- REAL ESTATE PROPERTIES -------------------------------- */
+    case 'properties':
+      return (
+        <section style={{ padding: `${paddingY} ${paddingX}`, backgroundColor: section.bgVariant === 'card' ? theme.cardBg : 'transparent', boxSizing: 'border-box' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', maxWidth: 740, margin: `0 auto ${isMobile ? 24 : 40}px` }}>
+              {section.badge && (
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: theme.primaryColor, textTransform: 'uppercase' }}>
+                  {section.badge}
+                </span>
+              )}
+              <h2 style={{ fontFamily: theme.headingFont, fontSize: isMobile ? '1.85rem' : '2.7rem', fontWeight: 800, margin: '8px 0 12px', color: theme.textColor }}>
+                {section.title}
+              </h2>
+              {section.description && <p style={{ color: theme.textMuted, fontSize: '1rem' }}>{section.description}</p>}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : isTablet ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 24 }}>
+              {(section.items || []).map((prop) => (
+                <div
+                  key={prop.id}
+                  style={{
+                    background: theme.cardBg,
+                    border: `1px solid ${theme.borderColor}`,
+                    borderRadius: theme.borderRadius,
+                    overflow: 'hidden',
+                    boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <div style={{ position: 'relative', height: 230 }}>
+                    <img src={prop.image} alt={prop.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <span
+                      style={{
+                        position: 'absolute',
+                        bottom: 12,
+                        left: 12,
+                        background: 'rgba(0,0,0,0.78)',
+                        color: '#ffffff',
+                        padding: '4px 12px',
+                        borderRadius: 6,
+                        fontWeight: 800,
+                        fontSize: '1rem',
+                        backdropFilter: 'blur(4px)',
+                      }}
+                    >
+                      {prop.price}
+                    </span>
+                    {prop.tag && (
+                      <span
+                        style={{
+                          position: 'absolute',
+                          top: 12,
+                          right: 12,
+                          background: theme.primaryColor,
+                          color: '#ffffff',
+                          padding: '3px 10px',
+                          borderRadius: 4,
+                          fontWeight: 700,
+                          fontSize: '0.72rem',
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        {prop.tag}
+                      </span>
+                    )}
+                  </div>
+
+                  <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: theme.textMuted, fontSize: '0.8rem', marginBottom: 6 }}>
+                      <MapPin size={14} color={theme.primaryColor} />
+                      <span>{prop.subtitle || 'Prime Location'}</span>
+                    </div>
+                    <h3 style={{ fontFamily: theme.headingFont, fontSize: '1.2rem', fontWeight: 800, color: theme.textColor, marginBottom: 8 }}>
+                      {prop.title}
+                    </h3>
+                    <p style={{ color: theme.textMuted, fontSize: '0.88rem', lineHeight: 1.5, marginBottom: 16 }}>
+                      {prop.description}
+                    </p>
+
+                    <div style={{ marginTop: 'auto', paddingTop: 14, borderTop: `1px solid ${theme.borderColor}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.textMuted }}>
+                        Virtual Tour Available
+                      </span>
+                      <button
+                        onClick={() => handleActionClick('contact', `Tour: ${prop.title}`)}
+                        style={{
+                          background: `${theme.primaryColor}18`,
+                          color: theme.primaryColor,
+                          border: `1px solid ${theme.primaryColor}44`,
+                          padding: '6px 14px',
+                          borderRadius: 6,
+                          fontSize: '0.82rem',
+                          fontWeight: 700,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Schedule Tour
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+
+    /* -------------------------------- EDITORIAL / BLOG MAGAZINE -------------------------------- */
+    case 'blog':
+      return (
+        <section style={{ padding: `${paddingY} ${paddingX}`, backgroundColor: theme.cardBg, boxSizing: 'border-box' }}>
+          <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: isMobile ? 24 : 36, flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                {section.badge && (
+                  <span style={{ fontSize: '0.75rem', fontWeight: 800, color: theme.primaryColor, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    {section.badge}
+                  </span>
+                )}
+                <h2 style={{ fontFamily: theme.headingFont, fontSize: isMobile ? '1.85rem' : '2.6rem', fontWeight: 800, margin: '6px 0', color: theme.textColor }}>
+                  {section.title}
+                </h2>
+                {section.description && <p style={{ color: theme.textMuted, fontSize: '0.96rem' }}>{section.description}</p>}
+              </div>
+              <button
+                onClick={() => handleActionClick('blog', 'Explore Full Editorial Archive')}
+                style={{ fontSize: '0.86rem', color: theme.primaryColor, fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                View all articles →
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : isTablet ? '1fr 1fr' : 'repeat(3, 1fr)', gap: 24 }}>
+              {(section.items || []).map((art) => (
+                <div
+                  key={art.id}
+                  onClick={() => onSelectItem && onSelectItem(art)}
+                  style={{
+                    background: theme.bgColor,
+                    borderRadius: theme.borderRadius,
+                    overflow: 'hidden',
+                    border: `1px solid ${theme.borderColor}`,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'transform 0.2s ease',
+                  }}
+                >
+                  {art.image && (
+                    <div style={{ height: 210, overflow: 'hidden' }}>
+                      <img src={art.image} alt={art.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </div>
+                  )}
+                  <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, color: theme.primaryColor, textTransform: 'uppercase' }}>
+                        {art.tag || 'EDITORIAL'}
+                      </span>
+                      <span style={{ fontSize: '0.74rem', color: theme.textMuted }}>{art.period || '5 min read'}</span>
+                    </div>
+                    <h3 style={{ fontFamily: theme.headingFont, fontSize: '1.22rem', fontWeight: 800, color: theme.textColor, marginBottom: 8, lineHeight: 1.3 }}>
+                      {art.title}
+                    </h3>
+                    <p style={{ color: theme.textMuted, fontSize: '0.88rem', lineHeight: 1.55, flex: 1, marginBottom: 16 }}>
+                      {art.description}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: 12, borderTop: `1px solid ${theme.borderColor}` }}>
+                      <span style={{ fontSize: '0.82rem', fontWeight: 600, color: theme.textColor }}>
+                        By {art.author || 'MACSAC Editorial'}
+                      </span>
+                      <ArrowRight size={15} color={theme.primaryColor} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+
+    /* -------------------------------- TECHNICAL SPECS MATRIX -------------------------------- */
+    case 'specs':
+      return (
+        <section style={{ padding: `${paddingY} ${paddingX}`, backgroundColor: theme.cardBg, boxSizing: 'border-box' }}>
+          <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', maxWidth: 700, margin: `0 auto ${isMobile ? 24 : 36}px` }}>
+              {section.badge && (
+                <span style={{ fontSize: '0.75rem', fontWeight: 700, color: theme.primaryColor, textTransform: 'uppercase' }}>
+                  {section.badge}
+                </span>
+              )}
+              <h2 style={{ fontFamily: theme.headingFont, fontSize: isMobile ? '1.8rem' : '2.5rem', fontWeight: 800, margin: '8px 0', color: theme.textColor }}>
+                {section.title}
+              </h2>
+              {section.description && <p style={{ color: theme.textMuted, fontSize: '0.96rem' }}>{section.description}</p>}
+            </div>
+
+            <div style={{ background: theme.bgColor, border: `1px solid ${theme.borderColor}`, borderRadius: theme.borderRadius, overflow: 'hidden' }}>
+              {(section.items || []).map((spec, idx) => (
+                <div
+                  key={spec.id || idx}
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '1fr' : isTablet ? '200px 1fr' : '260px 1fr',
+                    padding: isMobile ? '12px 16px' : '16px 24px',
+                    borderBottom: idx !== (section.items?.length || 0) - 1 ? `1px solid ${theme.borderColor}` : 'none',
+                    alignItems: isMobile ? 'flex-start' : 'center',
+                    gap: isMobile ? 4 : 16,
+                  }}
+                >
+                  <span style={{ fontWeight: 700, fontSize: '0.94rem', color: theme.textColor }}>
+                    {spec.title}
+                  </span>
+                  <span style={{ color: theme.textMuted, fontSize: '0.9rem', lineHeight: 1.5 }}>
+                    {spec.description}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
+
+    /* -------------------------------- TIMELINE & ROADMAP -------------------------------- */
+    case 'timeline':
+      return (
+        <section style={{ padding: `${paddingY} ${paddingX}`, boxSizing: 'border-box' }}>
+          <div style={{ maxWidth: 900, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: isMobile ? 32 : 48 }}>
+              {section.badge && (
+                <span style={{ fontSize: '0.75rem', fontWeight: 800, color: theme.primaryColor, textTransform: 'uppercase' }}>
+                  {section.badge}
+                </span>
+              )}
+              <h2 style={{ fontFamily: theme.headingFont, fontSize: isMobile ? '1.85rem' : '2.6rem', fontWeight: 800, margin: '8px 0', color: theme.textColor }}>
+                {section.title}
+              </h2>
+              {section.description && <p style={{ color: theme.textMuted, fontSize: '0.96rem' }}>{section.description}</p>}
+            </div>
+
+            <div style={{ position: 'relative', borderLeft: `2px solid ${theme.primaryColor}55`, marginLeft: isMobile ? 12 : 24, paddingLeft: isMobile ? 20 : 32 }}>
+              {(section.items || []).map((step, idx) => (
+                <div key={step.id || idx} style={{ marginBottom: 32, position: 'relative' }}>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: isMobile ? -27 : -39,
+                      top: 4,
+                      width: 14,
+                      height: 14,
+                      borderRadius: '50%',
+                      background: theme.primaryColor,
+                      boxShadow: `0 0 10px ${theme.primaryColor}88`,
+                    }}
+                  />
+                  <span style={{ fontSize: '0.78rem', fontWeight: 800, color: theme.primaryColor, textTransform: 'uppercase' }}>
+                    {step.tag || `STEP 0${idx + 1}`}
+                  </span>
+                  <h3 style={{ fontFamily: theme.headingFont, fontSize: '1.28rem', fontWeight: 700, color: theme.textColor, margin: '4px 0 8px' }}>
+                    {step.title}
+                  </h3>
+                  <p style={{ color: theme.textMuted, fontSize: '0.92rem', lineHeight: 1.6, margin: 0 }}>
+                    {step.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      );
 
     /* -------------------------------- TESTIMONIALS -------------------------------- */
     case 'testimonials':

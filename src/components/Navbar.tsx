@@ -74,7 +74,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </a>
 
         {/* Center Nav Links */}
-        <nav className="nav-links" style={{ display: 'flex' }}>
+        <nav className="nav-links">
           <button onClick={onExploreTemplates} className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Compass size={16} />
             Explore Templates

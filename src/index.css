@@ -102,10 +102,19 @@ h1, h2, h3, h4, h5, h6 {
   letter-spacing: -0.015em;
 }
 
-body:not([data-theme="dark"]) h1,
-body:not([data-theme="dark"]) h2,
-body:not([data-theme="dark"]) h3 {
+body:not([data-theme="dark"]) h1:not(.website-canvas-root *),
+body:not([data-theme="dark"]) h2:not(.website-canvas-root *),
+body:not([data-theme="dark"]) h3:not(.website-canvas-root *) {
   color: #3d2111;
+}
+
+.website-canvas-root h1,
+.website-canvas-root h2,
+.website-canvas-root h3,
+.website-canvas-root h4,
+.website-canvas-root h5,
+.website-canvas-root h6 {
+  color: inherit;
 }
 
 a {
@@ -324,6 +333,61 @@ input, textarea, select {
 .theme-toggle-btn:hover {
   border-color: var(--copper-medium);
   color: var(--copper-medium);
+}
+
+/* Tablet & Mobile Studio Nav Alignment */
+@media (max-width: 1024px) {
+  .nav-wrapper {
+    height: 64px;
+    padding: 0 16px;
+    gap: 16px;
+  }
+  .brand-sub {
+    display: none;
+  }
+  .brand-title {
+    font-size: 1.05rem;
+  }
+  .nav-links {
+    gap: 16px;
+  }
+  .nav-link {
+    font-size: 0.86rem;
+    padding: 6px 4px;
+    white-space: nowrap;
+  }
+  .nav-controls {
+    gap: 8px;
+  }
+  .nav-controls .btn-primary {
+    padding: 8px 14px !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .nav-wrapper {
+    height: 60px;
+    gap: 10px;
+  }
+  .brand-title span.studio-pill {
+    display: none;
+  }
+  .nav-links {
+    gap: 10px;
+  }
+  .nav-link {
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .nav-links {
+    display: none !important;
+  }
+  .brand-text-block {
+    display: none;
+  }
 }
 
 /* Modals */
@@ -575,4 +639,35 @@ input, textarea, select {
     transform: translateY(0);
   }
 }
+
+/* Preview Modal Responsive Header */
+.preview-header-bar {
+  min-height: 64px;
+  background: #161413;
+  border-bottom: 1px solid #2d2622;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 24px;
+  z-index: 20;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .preview-header-bar {
+    padding: 8px 14px;
+    gap: 10px;
+  }
+  .preview-header-title {
+    max-width: 170px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .preview-device-btn span {
+    display: none;
+  }
+}
+
 

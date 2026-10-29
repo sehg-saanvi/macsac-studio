@@ -73,7 +73,7 @@ export const technologyTemplates: WebsiteTemplate[] = [
           {
             id: 'nth-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'bento',
             badge: 'NEXT-GEN AI RUNTIME // 4.8X FASTER INFERENCE',
             title: 'Deploy Open Weights & Custom Foundation Models at Sub-10ms Latency',
             subtitle: 'Global Distributed Tensor Orchestration',
@@ -103,7 +103,7 @@ export const technologyTemplates: WebsiteTemplate[] = [
           {
             id: 'nth-features-preview',
             type: 'features',
-            layoutVariant: 'cards',
+            layoutVariant: 'bento',
             badge: 'CORE PILLARS',
             title: 'Autonomous Model Infrastructure',
             description: 'Run open-source Llama 3, Mistral, Whisper, and bespoke LoRA adapters with zero DevOps overhead.',
@@ -316,6 +316,7 @@ export const technologyTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'DEVPULSE',
       logoText: 'DEVPULSE // EDGE RUNTIME',
+      layoutStyle: 'minimal',
       links: [
         { id: 'dp-nav-1', label: 'Runtime', pageSlug: 'home' },
         { id: 'dp-nav-2', label: 'Global Infrastructure', pageSlug: 'features' },
@@ -350,7 +351,7 @@ export const technologyTemplates: WebsiteTemplate[] = [
           {
             id: 'dph-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'terminal',
             badge: 'ZERO COLD STARTS // V8 ISOLATE RUNTIME',
             title: 'Run TypeScript & WebAssembly at the Literal Speed of Light',
             subtitle: 'Global Edge Cloud with Instant <8ms Cold Starts',
@@ -625,7 +626,7 @@ export const technologyTemplates: WebsiteTemplate[] = [
           {
             id: 'orbh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'diagonal',
             badge: 'COLLABORATIVE AUTOMATION // 0.02MM PRECISION',
             title: 'Empowering High-Yield Manufacturing with Autonomous AI Robotics',
             subtitle: 'Collaborative 6-Axis Arms & Autonomous Mobile Rovers',
@@ -898,7 +899,7 @@ export const technologyTemplates: WebsiteTemplate[] = [
           {
             id: 'zenh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'swiss',
             badge: 'GLOBAL TREASURY PLATFORM // 60+ CURRENCIES',
             title: 'Unified Corporate Treasury for Multinational Scale',
             subtitle: 'Real-Time Cross-Border FX, Corporate Smart Cards & Liquidity Yield',
@@ -1102,4 +1103,6 @@ export const technologyTemplates: WebsiteTemplate[] = [
     ],
   },
 ];
+
+
 

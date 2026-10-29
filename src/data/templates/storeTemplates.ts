@@ -72,7 +72,7 @@ export const storeTemplates: WebsiteTemplate[] = [
           {
             id: 'meh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'luxury-stacked',
             badge: 'PLACE VENDÔME // HAUTE JOAILLERIE',
             title: 'Eternal Brilliance Forged in Platinum and Rare Diamonds',
             subtitle: 'Iconic Fine Jewelry Masterpieces Crafted by Hand',
@@ -327,7 +327,7 @@ export const storeTemplates: WebsiteTemplate[] = [
           {
             id: 'aubh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'lookbook',
             badge: 'CLINICALLY PROVEN BIO-FERMENTED ACTIVES',
             title: 'Luminous Skin Powered by Rare Wild Botanicals',
             subtitle: '100% Non-Toxic, Clean Formulations in Miron Violet Glass',
@@ -582,7 +582,7 @@ export const storeTemplates: WebsiteTemplate[] = [
           {
             id: 'solh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'organic',
             badge: 'WHEEL-THROWN STONEWARE // WOOD KILN FIRED',
             title: 'Tactile Vessels Shaped by Human Hands & Open Fire',
             subtitle: 'Small-Batch Tableware & Sculptural Ceramic Objects',
@@ -837,7 +837,7 @@ export const storeTemplates: WebsiteTemplate[] = [
           {
             id: 'modh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'swiss',
             badge: 'SOLID EUROPEAN OAK // CIRCULAR DESIGN',
             title: 'Quiet Architecture for Everyday Living Spaces',
             subtitle: 'Scandinavian Craftsmanship Crafted to Last Generations',
@@ -1059,6 +1059,7 @@ export const storeTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'ATELIER NOIR',
       logoText: 'ATELIER NOIR // PARIS',
+      layoutStyle: 'minimal',
       links: [
         { id: 'an-1', label: 'Runway', pageSlug: 'home' },
         { id: 'an-2', label: 'Shop The Drop', pageSlug: 'shop' },
@@ -1093,7 +1094,7 @@ export const storeTemplates: WebsiteTemplate[] = [
           {
             id: 'anh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'neo-brutalist',
             badge: 'DROP 04 // PARIS RUNWAY EXCLUSIVE',
             title: 'Deconstructed Tailoring for the Architectural Silhouette',
             subtitle: 'Japanese Heavyweight Twill, Raw Selvedge & Wool Gabardine',
@@ -1106,7 +1107,7 @@ export const storeTemplates: WebsiteTemplate[] = [
           {
             id: 'anh-products',
             type: 'portfolio',
-            layoutVariant: 'grid',
+            layoutVariant: 'lookbook',
             badge: 'KEY GARMENTS',
             title: 'Drop 04 Highlights',
             description: 'Hand-cut in our Marais atelier. Once sold out, silhouettes are permanently retired into the house archive.',
@@ -1282,4 +1283,9 @@ export const storeTemplates: WebsiteTemplate[] = [
     ],
   },
 ];
+
+
+
+
+
 

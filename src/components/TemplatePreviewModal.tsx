@@ -41,18 +41,9 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
       }}>
         
         {/* Top Preview Action Bar */}
-        <header style={{
-          height: 64,
-          background: '#161413',
-          borderBottom: '1px solid #2d2622',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '0 24px',
-          zIndex: 20,
-        }}>
+        <header className="preview-header-bar">
           {/* Left: Back button & Template Name */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
             <button
               onClick={onClose}
               style={{
@@ -60,28 +51,29 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
                 alignItems: 'center',
                 gap: 6,
                 color: '#dcd2ca',
-                fontSize: '0.88rem',
+                fontSize: '0.85rem',
                 fontWeight: 600,
-                padding: '8px 14px',
+                padding: '7px 12px',
                 borderRadius: 8,
                 background: '#241c18',
                 border: '1px solid #3d2f28',
+                cursor: 'pointer',
               }}
             >
-              <ArrowLeft size={16} /> Back to Gallery
+              <ArrowLeft size={15} /> Back
             </button>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ color: '#ffffff', fontWeight: 700, fontSize: '0.98rem' }}>
+              <span className="preview-header-title" style={{ color: '#ffffff', fontWeight: 700, fontSize: '0.94rem' }} title={template.name}>
                 {template.name}
               </span>
-              <span style={{ color: '#a6988f', fontSize: '0.75rem' }}>
-                {template.categoryLabel} • {template.aestheticLabel}
+              <span style={{ color: '#a6988f', fontSize: '0.72rem' }}>
+                {template.categoryLabel}
               </span>
             </div>
           </div>
 
           {/* Center: Device Switcher & Page Switcher */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             {/* Multi-page Switcher */}
             {template.pages.length > 1 && (
               <div style={{
@@ -90,19 +82,23 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
                 borderRadius: 8,
                 padding: 3,
                 border: '1px solid #332721',
+                overflowX: 'auto',
+                maxWidth: '400px',
               }}>
                 {template.pages.map(page => (
                   <button
                     key={page.id}
                     onClick={() => setActivePageId(page.id)}
                     style={{
-                      padding: '4px 12px',
-                      fontSize: '0.8rem',
+                      padding: '4px 10px',
+                      fontSize: '0.78rem',
                       fontWeight: 600,
                       borderRadius: 6,
                       background: activePageId === page.id ? 'var(--copper-medium)' : 'transparent',
                       color: activePageId === page.id ? '#ffffff' : '#a6988f',
                       transition: 'all 0.2s ease',
+                      whiteSpace: 'nowrap',
+                      cursor: 'pointer',
                     }}
                   >
                     {page.name}
@@ -120,55 +116,61 @@ export const TemplatePreviewModal: React.FC<TemplatePreviewModalProps> = ({
               border: '1px solid #332721',
             }}>
               <button
+                className="preview-device-btn"
                 onClick={() => setViewport('desktop')}
                 style={{
-                  padding: '6px 12px',
+                  padding: '5px 10px',
                   borderRadius: 6,
                   color: viewport === 'desktop' ? '#ffffff' : '#7d6f66',
                   background: viewport === 'desktop' ? '#2d2622' : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
-                  fontSize: '0.8rem',
+                  gap: 5,
+                  fontSize: '0.78rem',
                   fontWeight: 600,
+                  cursor: 'pointer',
                 }}
                 title="Desktop View (100%)"
               >
-                <Monitor size={15} /> Desktop
+                <Monitor size={14} /> <span>Desktop</span>
               </button>
               <button
+                className="preview-device-btn"
                 onClick={() => setViewport('tablet')}
                 style={{
-                  padding: '6px 12px',
+                  padding: '5px 10px',
                   borderRadius: 6,
                   color: viewport === 'tablet' ? '#ffffff' : '#7d6f66',
                   background: viewport === 'tablet' ? '#2d2622' : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
-                  fontSize: '0.8rem',
+                  gap: 5,
+                  fontSize: '0.78rem',
                   fontWeight: 600,
+                  cursor: 'pointer',
                 }}
                 title="Tablet View (768px)"
               >
-                <Tablet size={15} /> Tablet
+                <Tablet size={14} /> <span>Tablet</span>
               </button>
               <button
+                className="preview-device-btn"
                 onClick={() => setViewport('mobile')}
                 style={{
-                  padding: '6px 12px',
+                  padding: '5px 10px',
                   borderRadius: 6,
                   color: viewport === 'mobile' ? '#ffffff' : '#7d6f66',
                   background: viewport === 'mobile' ? '#2d2622' : 'transparent',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 6,
-                  fontSize: '0.8rem',
+                  gap: 5,
+                  fontSize: '0.78rem',
                   fontWeight: 600,
+                  cursor: 'pointer',
                 }}
                 title="Mobile View (390px)"
               >
-                <Smartphone size={15} /> Mobile
+                <Smartphone size={14} /> <span>Mobile</span>
               </button>
             </div>
           </div>

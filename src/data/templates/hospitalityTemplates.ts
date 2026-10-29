@@ -72,7 +72,7 @@ export const hospitalityTemplates: WebsiteTemplate[] = [
           {
             id: 'abh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'organic',
             badge: 'WILD FERMENTATION // STONEGROUND FLOUR',
             title: 'Naturally Fermented Sourdough Baked in Woodfired Stone Heaths',
             subtitle: 'Honoring the Ancient Craft of Breadmaking',
@@ -101,8 +101,8 @@ export const hospitalityTemplates: WebsiteTemplate[] = [
           },
           {
             id: 'abh-menu-preview',
-            type: 'portfolio',
-            layoutVariant: 'grid',
+            type: 'menu',
+            layoutVariant: 'menu',
             badge: 'DAILY SPECIALS',
             title: 'Fresh from Today’s Morning Bake',
             description: 'Arrive early before morning sell-out or place your weekend reservation online.',
@@ -330,6 +330,7 @@ export const hospitalityTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'GRAND HORIZON',
       logoText: 'THE GRAND HORIZON RESORT',
+      layoutStyle: 'cinema',
       links: [
         { id: 'gh-nav-1', label: 'The Resort', pageSlug: 'home' },
         { id: 'gh-nav-2', label: 'Suites & Villas', pageSlug: 'villas' },
@@ -363,7 +364,7 @@ export const hospitalityTemplates: WebsiteTemplate[] = [
           {
             id: 'ghh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'cinema',
             badge: 'AMALFI COAST // EXCLUSIVE CLIFFSIDE HAVEN',
             title: 'Where Mediterranean Azure Meets Timeless Italian Grandeur',
             subtitle: 'Panoramic Suites, Michelin Gastronomy & Private Yacht Charters',
@@ -890,7 +891,7 @@ export const hospitalityTemplates: WebsiteTemplate[] = [
           {
             id: 'odsh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'cinema',
             badge: 'FIRENZE TRADIZIONE // WOODFIRED HEARTH',
             title: 'Tuscan Soul Food Cooked Over Glowing Oak Coals',
             subtitle: 'Hand-Rolled Fresh Pasta, Chianina Beef & Organic Chianti',
@@ -902,8 +903,8 @@ export const hospitalityTemplates: WebsiteTemplate[] = [
           },
           {
             id: 'odsh-dishes-preview',
-            type: 'portfolio',
-            layoutVariant: 'grid',
+            type: 'menu',
+            layoutVariant: 'menu',
             badge: 'SPECIALITÀ DELLA CASA',
             title: 'Signature Dishes of the Hearth',
             description: 'Recipes handed down through three generations of the Bellini family.',
@@ -1084,4 +1085,5 @@ export const hospitalityTemplates: WebsiteTemplate[] = [
     ],
   },
 ];
+
 

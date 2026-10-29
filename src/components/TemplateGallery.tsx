@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   RotateCcw,
   Search,
@@ -6,6 +6,7 @@ import {
   FileEdit,
   Tag,
   CheckCircle2,
+  Heart,
 } from 'lucide-react';
 import { FilterState, WebsiteTemplate, UserWebsiteDetails } from '../types';
 import { TemplateCard } from './TemplateCard';
@@ -23,13 +24,18 @@ interface TemplateGalleryProps {
 
 const CATEGORIES = [
   { id: 'all', label: 'All Categories' },
-  { id: 'business', label: 'Business & Agency' },
-  { id: 'portfolio', label: 'Creative Portfolios' },
+  { id: 'favorites', label: 'Saved Favorites' },
+  { id: 'agency', label: 'Creative Agency' },
+  { id: 'portfolio', label: 'Portfolios' },
+  { id: 'business', label: 'Corporate & Consulting' },
+  { id: 'technology', label: 'SaaS & Tech' },
   { id: 'store', label: 'Online Stores' },
-  { id: 'hospitality', label: 'Food & Hospitality' },
-  { id: 'technology', label: 'Technology & SaaS' },
+  { id: 'realestate', label: 'Real Estate & Living' },
+  { id: 'hospitality', label: 'Food & Dining' },
+  { id: 'editorial', label: 'Magazines & Editorial' },
+  { id: 'landing', label: 'App Launch & Landing' },
   { id: 'education', label: 'Education & Non-Profit' },
-  { id: 'events', label: 'Events & Weddings' },
+  { id: 'events', label: 'Events & Conferences' },
 ];
 
 const AESTHETICS = [
@@ -83,6 +89,18 @@ const INTENT_MAPPINGS = [
     regex: /agency|studio|creative\s*agency|branding|design\s*agency|multimedia|advisory/i,
     tags: ['agency', 'studio', 'creative', 'design', 'branding', 'business'],
   },
+  {
+    regex: /real\s*estate|property|properties|villa|penthouse|estate|residence|architect|architecture/i,
+    tags: ['real estate', 'luxury', 'penthouses', 'villas', 'estates', 'architecture', 'property', 'monolith'],
+  },
+  {
+    regex: /magazine|editorial|journal|blog|publication|essay|article|critique/i,
+    tags: ['magazine', 'editorial', 'blog', 'journal', 'publishing', 'articles'],
+  },
+  {
+    regex: /landing|app|mobile\s*app|waitlist|wearable|product\s*launch/i,
+    tags: ['landing page', 'mobile app', 'waitlist', 'product launch', 'saas', 'biometrics'],
+  },
 ];
 
 const STOP_WORDS = new Set([
@@ -101,6 +119,30 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
   websiteDetails,
   onEditDetails,
 }) => {
+  const [savedFavorites, setSavedFavorites] = useState<string[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('macsac_studio_favorites') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    const handleFavChange = () => {
+      try {
+        setSavedFavorites(JSON.parse(localStorage.getItem('macsac_studio_favorites') || '[]'));
+      } catch {
+        // ignore
+      }
+    };
+    window.addEventListener('macsac_favorites_changed', handleFavChange);
+    window.addEventListener('storage', handleFavChange);
+    return () => {
+      window.removeEventListener('macsac_favorites_changed', handleFavChange);
+      window.removeEventListener('storage', handleFavChange);
+    };
+  }, []);
+
   // Intelligent Search and Filter logic with zero dead-ends
   const { filteredTemplates, isFallback } = useMemo(() => {
     const userKws = (websiteDetails?.keywords || []).map((k) => k.toLowerCase().trim());
@@ -137,7 +179,11 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
         const tagsLower = t.tags.map((tg) => tg.toLowerCase());
 
         // Category filter
-        if (filters.category !== 'all' && t.category !== filters.category) {
+        if (filters.category === 'favorites') {
+          if (!savedFavorites.includes(t.id)) {
+            return { template: t, score: -1 };
+          }
+        } else if (filters.category !== 'all' && t.category !== filters.category) {
           return { template: t, score: -1 };
         }
 
@@ -236,7 +282,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
       .slice(0, 8);
 
     return { filteredTemplates: fallbackList, isFallback: true };
-  }, [templates, filters, websiteDetails]);
+  }, [templates, filters, websiteDetails, savedFavorites]);
 
   const hasActiveFilters =
     filters.category !== 'all' ||
@@ -383,9 +429,27 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
                 color: filters.category === cat.id ? '#ffffff' : 'var(--text-secondary)',
                 border: '1px solid var(--border-color)',
                 boxShadow: filters.category === cat.id ? 'var(--shadow-copper)' : 'none',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
               }}
             >
+              {cat.id === 'favorites' && (
+                <Heart size={13} fill={filters.category === 'favorites' ? '#ffffff' : '#e11d48'} color={filters.category === 'favorites' ? '#ffffff' : '#e11d48'} />
+              )}
               {cat.label}
+              {cat.id === 'favorites' && savedFavorites.length > 0 && (
+                <span style={{
+                  fontSize: '0.72rem',
+                  padding: '1px 6px',
+                  borderRadius: 9999,
+                  background: filters.category === 'favorites' ? 'rgba(255,255,255,0.25)' : 'var(--copper-glow)',
+                  color: filters.category === 'favorites' ? '#ffffff' : 'var(--copper-dark)',
+                  fontWeight: 700,
+                }}>
+                  {savedFavorites.length}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -548,20 +612,45 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
         )}
 
         {/* Templates Grid */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-          gap: 28,
-        }}>
-          {filteredTemplates.map((template) => (
-            <TemplateCard
-              key={template.id}
-              template={template}
-              onPreview={onPreview}
-              onCustomize={onCustomize}
-            />
-          ))}
-        </div>
+        {filters.category === 'favorites' && filteredTemplates.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '60px 20px',
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border-color)',
+            borderRadius: 'var(--radius-md)',
+            maxWidth: 600,
+            margin: '0 auto',
+          }}>
+            <Heart size={44} color="#e11d48" style={{ marginBottom: 16 }} />
+            <h3 style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: 8 }}>No Saved Templates Yet</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.92rem', marginBottom: 20 }}>
+              Click the heart icon on any template card while browsing to bookmark your favorite designs here for quick access and comparison.
+            </p>
+            <button
+              onClick={() => onFilterChange({ category: 'all' })}
+              className="btn-primary"
+              style={{ padding: '8px 20px', fontSize: '0.88rem' }}
+            >
+              Browse All Templates
+            </button>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+            gap: 28,
+          }}>
+            {filteredTemplates.map((template) => (
+              <TemplateCard
+                key={template.id}
+                template={template}
+                onPreview={onPreview}
+                onCustomize={onCustomize}
+              />
+            ))}
+          </div>
+        )}
 
       </div>
     </section>

@@ -73,7 +73,7 @@ export const educationTemplates: WebsiteTemplate[] = [
           {
             id: 'heh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'swiss',
             badge: 'GLOBAL CONSERVATION // BIODIVERSITY RESTORATION',
             title: 'Regenerating Living Ecosystems Through Science & Education',
             subtitle: 'Empowering Communities to Safeguard Earth’s Vital Biosphere',
@@ -542,4 +542,5 @@ export const educationTemplates: WebsiteTemplate[] = [
     ],
   },
 ];
+
 

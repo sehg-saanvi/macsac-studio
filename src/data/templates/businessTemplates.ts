@@ -8,7 +8,7 @@ export const businessTemplates: WebsiteTemplate[] = [
     id: 'lumina-studio',
     name: 'Lumina Creative Studio',
     description: 'A prestigious, luxury copper & bronze website template tailored for digital design agencies, creative studios, and brand consultants.',
-    category: 'business',
+    category: 'agency',
     categoryLabel: 'Creative Agency',
     aesthetic: 'luxury',
     aestheticLabel: 'Copper Luxury',
@@ -39,6 +39,7 @@ export const businessTemplates: WebsiteTemplate[] = [
     navigation: {
       brandName: 'LUMINA',
       logoText: 'LUMINA STUDIO',
+      layoutStyle: 'floating',
       links: [
         { id: 'lum-nav-1', label: 'Home', pageSlug: 'home' },
         { id: 'lum-nav-2', label: 'Services', pageSlug: 'services' },
@@ -73,7 +74,7 @@ export const businessTemplates: WebsiteTemplate[] = [
           {
             id: 'lum-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'asymmetric',
             badge: 'GLOBAL DESIGN ATELIER // 2026 REEL',
             title: 'Sculpting Digital Experiences That Command Prestige',
             subtitle: 'Strategic Brand Identity & Modern Web Engineering',
@@ -523,7 +524,7 @@ export const businessTemplates: WebsiteTemplate[] = [
           {
             id: 'aph-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'architect',
             badge: 'INSTITUTIONAL STRATEGIC ADVISORY',
             title: 'Navigating High-Stakes Capital & Global Restructuring',
             description: 'Apex Advisory provides sovereign wealth funds, multinational conglomerates, and private capital sponsors with authoritative counsel on cross-border transactions.',
@@ -1503,4 +1504,5 @@ export const businessTemplates: WebsiteTemplate[] = [
     ],
   },
 ];
+
 

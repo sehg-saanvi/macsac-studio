@@ -72,7 +72,7 @@ export const eventTemplates: WebsiteTemplate[] = [
           {
             id: 'swh-hero',
             type: 'hero',
-            layoutVariant: 'split',
+            layoutVariant: 'neo-brutalist',
             badge: 'DESTINATION WEDDING ATELIER // LAKE COMO & PROVENCE',
             title: 'Cinematic Celebrations Crafted with Poetic Intimacy',
             subtitle: 'Bespoke Multi-Day Wedding Production Worldwide',
@@ -563,4 +563,5 @@ export const eventTemplates: WebsiteTemplate[] = [
     ],
   },
 ];
+
 
