@@ -10,6 +10,7 @@ import {
   Download,
   Send,
   Cloud,
+  Sparkles,
 } from 'lucide-react';
 
 import { UserAccount } from '../types';
@@ -31,6 +32,8 @@ interface EditorBottomBarProps {
   onBackToGallery: () => void;
   currentUser?: UserAccount | null;
   onOpenAuth?: () => void;
+  onToggleAiAgent?: () => void;
+  isAiAgentOpen?: boolean;
 }
 
 const FONT = "'Inter', sans-serif";
@@ -108,6 +111,8 @@ export const EditorBottomBar: React.FC<EditorBottomBarProps> = ({
   onBackToGallery,
   currentUser,
   onOpenAuth,
+  onToggleAiAgent,
+  isAiAgentOpen = false,
 }) => {
   const [nameInputFocused, setNameInputFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -346,6 +351,40 @@ export const EditorBottomBar: React.FC<EditorBottomBarProps> = ({
             );
           })}
         </div>
+
+        {/* AI Agent Button */}
+        {onToggleAiAgent && (
+          <button
+            onClick={onToggleAiAgent}
+            title="Open AI Website Setup & Management Agent"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '5px 12px',
+              borderRadius: 6,
+              border: isAiAgentOpen ? `1px solid ${COLOR_COPPER}` : `1px solid ${COLOR_DIVIDER}`,
+              background: isAiAgentOpen ? 'rgba(177,112,78,0.2)' : 'rgba(255,255,255,0.03)',
+              color: isAiAgentOpen ? '#ffffff' : '#f5f0eb',
+              fontFamily: FONT,
+              fontSize: '0.78rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.borderColor = COLOR_COPPER;
+            }}
+            onMouseLeave={(e) => {
+              if (!isAiAgentOpen) {
+                (e.currentTarget as HTMLButtonElement).style.borderColor = COLOR_DIVIDER;
+              }
+            }}
+          >
+            <Sparkles size={13} color={COLOR_COPPER} />
+            <span style={{ fontFamily: FONT }}>AI Agent</span>
+          </button>
+        )}
 
         <Divider />
 

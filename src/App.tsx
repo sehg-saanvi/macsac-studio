@@ -31,6 +31,7 @@ import { ExportModal } from './components/ExportModal';
 import { ProjectsDrawer } from './components/ProjectsDrawer';
 import { OnboardingModal } from './components/OnboardingModal';
 import { AuthModal } from './components/AuthModal';
+import { AiAgentDrawer } from './components/AiAgentDrawer';
 
 export function App() {
   // Theme state: defaults to light (synced to body data-theme)
@@ -55,6 +56,7 @@ export function App() {
   const [previewTemplate, setPreviewTemplate] = useState<WebsiteTemplate | null>(null);
   const [exportProject, setExportProject] = useState<Project | null>(null);
   const [projectsDrawerOpen, setProjectsDrawerOpen] = useState(false);
+  const [aiAgentOpen, setAiAgentOpen] = useState(false);
 
   // Template catalog popup
   const [catalogModalOpen, setCatalogModalOpen] = useState(false);
@@ -235,6 +237,7 @@ export function App() {
             onExploreTemplates={handleScrollToGallery}
             onOpenHowItWorks={handleScrollToHowItWorks}
             onStartCreating={handleStartCreating}
+            onOpenAiAgent={() => setAiAgentOpen(true)}
             currentUser={currentUser}
             onOpenAuth={() => setAuthModalOpen(true)}
             onLogout={handleLogout}
@@ -251,6 +254,7 @@ export function App() {
               onSearchChange={handleSearchChange}
               onExploreTemplates={handleScrollToGallery}
               onStartCreating={handleStartCreating}
+              onOpenAiAgent={() => setAiAgentOpen(true)}
               websiteDetails={websiteDetails}
               onEditDetails={() => setOnboardingModalOpen(true)}
             />
@@ -411,6 +415,24 @@ export function App() {
           handleStartCreating();
         }}
       />
+
+      {/* AI Website Setup & Management Agent (Home view mode) */}
+      {viewMode === 'home' && (
+        <AiAgentDrawer
+          isOpen={aiAgentOpen}
+          onClose={() => setAiAgentOpen(false)}
+          onOpen={() => setAiAgentOpen(true)}
+          currentProject={null}
+          websiteDetails={websiteDetails}
+          onLaunchProject={(newProject) => {
+            saveProject(newProject);
+            refreshSavedProjects();
+            setCurrentProject(newProject);
+            setViewMode('editor');
+            window.scrollTo(0, 0);
+          }}
+        />
+      )}
     </div>
   );
 }

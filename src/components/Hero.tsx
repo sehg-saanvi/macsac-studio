@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, ArrowRight, CheckCircle2, ShieldCheck, Zap, Download, FileEdit } from 'lucide-react';
+import { Search, ArrowRight, CheckCircle2, ShieldCheck, Zap, Download, FileEdit, Sparkles } from 'lucide-react';
 import { UserWebsiteDetails } from '../types';
 
 interface HeroProps {
@@ -7,6 +7,7 @@ interface HeroProps {
   onSearchChange: (query: string) => void;
   onExploreTemplates: () => void;
   onStartCreating: () => void;
+  onOpenAiAgent?: () => void;
   websiteDetails?: UserWebsiteDetails | null;
   onEditDetails?: () => void;
 }
@@ -27,6 +28,7 @@ export const Hero: React.FC<HeroProps> = ({
   onSearchChange,
   onExploreTemplates,
   onStartCreating,
+  onOpenAiAgent,
   websiteDetails,
   onEditDetails,
 }) => {
@@ -182,10 +184,35 @@ export const Hero: React.FC<HeroProps> = ({
         <div style={{
           display: 'flex',
           justifyContent: 'center',
+          alignItems: 'center',
           gap: 16,
           marginTop: 32,
           flexWrap: 'wrap',
         }}>
+          {onOpenAiAgent && (
+            <button
+              onClick={onOpenAiAgent}
+              className="btn-ai-hero"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 8,
+                padding: '14px 26px',
+                fontSize: '1.02rem',
+                fontWeight: 700,
+                borderRadius: 'var(--radius-md)',
+                background: 'linear-gradient(135deg, #1a1614 0%, #2e2420 100%)',
+                color: '#fdfbf7',
+                border: '1.5px solid var(--copper-medium)',
+                boxShadow: '0 8px 24px rgba(177, 112, 78, 0.3)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              <Sparkles size={18} style={{ color: 'var(--copper-light)' }} />
+              <span>Ask AI Consultant</span>
+            </button>
+          )}
           <button onClick={onExploreTemplates} className="btn-primary" style={{ padding: '14px 32px', fontSize: '1.05rem' }}>
             Explore Templates
             <ArrowRight size={18} />

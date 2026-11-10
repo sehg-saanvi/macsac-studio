@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sun, Moon, FolderGit2, Compass, HelpCircle, User, LogOut, FileEdit, XCircle } from 'lucide-react';
+import { Sun, Moon, FolderGit2, Compass, HelpCircle, User, LogOut, FileEdit, XCircle, Sparkles } from 'lucide-react';
 import { UserAccount, UserWebsiteDetails } from '../types';
 
 interface NavbarProps {
@@ -10,6 +10,7 @@ interface NavbarProps {
   onExploreTemplates: () => void;
   onOpenHowItWorks: () => void;
   onStartCreating: () => void;
+  onOpenAiAgent?: () => void;
   currentUser: UserAccount | null;
   onOpenAuth: () => void;
   onLogout: () => void;
@@ -27,6 +28,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onExploreTemplates,
   onOpenHowItWorks,
   onStartCreating,
+  onOpenAiAgent,
   currentUser,
   onOpenAuth,
   onLogout,
@@ -150,6 +152,32 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right Nav Actions */}
         <div className="nav-controls">
+          {/* AI Consultant Trigger */}
+          {onOpenAiAgent && (
+            <button
+              onClick={onOpenAiAgent}
+              className="btn-ai-nav"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '7px 14px',
+                borderRadius: 'var(--radius-sm)',
+                background: 'linear-gradient(135deg, #2d2420 0%, #1a1614 100%)',
+                color: '#fdfbf7',
+                border: '1px solid var(--copper-medium)',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+              title="Open AI Website Setup & Management Agent"
+            >
+              <Sparkles size={14} color="var(--copper-light)" />
+              <span>AI Agent</span>
+            </button>
+          )}
+
           {/* Theme Switcher */}
           <button
             onClick={onToggleTheme}

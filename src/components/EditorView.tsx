@@ -13,6 +13,7 @@ import { EditorLeftSidebar } from './EditorLeftSidebar';
 import { EditorRightSidebar } from './EditorRightSidebar';
 import { EditorBottomBar } from './EditorBottomBar';
 import { WebsiteRenderer } from './WebsiteRenderer';
+import { AiAgentDrawer } from './AiAgentDrawer';
 import { createNewSection } from '../data/defaultSections';
 import { saveProject } from '../utils/storage';
 import { Check } from 'lucide-react';
@@ -42,6 +43,7 @@ export const EditorView: React.FC<EditorViewProps> = ({
   );
   const [isSaving, setIsSaving] = useState(false);
   const [publishModalOpen, setPublishModalOpen] = useState(false);
+  const [aiAgentOpen, setAiAgentOpen] = useState(false);
 
   // Undo & Redo History Stacks
   const [history, setHistory] = useState<Project[]>([initialProject]);
@@ -714,6 +716,19 @@ export const EditorView: React.FC<EditorViewProps> = ({
         onBackToGallery={onBackToGallery}
         currentUser={currentUser}
         onOpenAuth={onOpenAuth}
+        onToggleAiAgent={() => setAiAgentOpen(!aiAgentOpen)}
+        isAiAgentOpen={aiAgentOpen}
+      />
+
+      {/* AI Website Setup & Management Agent Drawer */}
+      <AiAgentDrawer
+        isOpen={aiAgentOpen}
+        onClose={() => setAiAgentOpen(false)}
+        onOpen={() => setAiAgentOpen(true)}
+        currentProject={project}
+        activePageId={activePage?.id}
+        onUpdateProject={(updated) => pushState(updated)}
+        onNavigatePage={handleSelectPage}
       />
 
       {/* Publish Simulation Modal */}
