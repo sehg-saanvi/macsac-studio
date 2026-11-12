@@ -1,5 +1,19 @@
-import React from 'react';
-import { Sun, Moon, FolderGit2, Compass, HelpCircle, User, LogOut, FileEdit, XCircle, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import {
+  Sun,
+  Moon,
+  FolderGit2,
+  Compass,
+  HelpCircle,
+  User,
+  LogOut,
+  FileEdit,
+  XCircle,
+  Sparkles,
+  Menu,
+  X,
+  ArrowRight,
+} from 'lucide-react';
 import { UserAccount, UserWebsiteDetails } from '../types';
 
 interface NavbarProps {
@@ -37,10 +51,17 @@ export const Navbar: React.FC<NavbarProps> = ({
   onClearDetails,
   onGoHome,
 }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleLinkClick = (action: () => void) => {
+    action();
+    setMobileMenuOpen(false);
+  };
+
   return (
     <header className="studio-nav">
       <div className="container nav-wrapper">
-        {/* Brand Logo */}
+        {/* Left: Brand Logo */}
         <a
           href="/"
           onClick={(e) => {
@@ -52,20 +73,12 @@ export const Navbar: React.FC<NavbarProps> = ({
             }
           }}
           className="brand-link"
-          style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}
           title="MACSAC Studio — Home"
         >
           <img
             src="/m-logo.png"
             alt="MACSAC Logo"
-            style={{
-              height: 38,
-              width: 'auto',
-              maxHeight: 38,
-              objectFit: 'contain',
-              display: 'block',
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.12))',
-            }}
+            className="brand-logo-img"
           />
           <div className="brand-text-block">
             <span className="brand-title">
@@ -75,102 +88,76 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </a>
 
-        {/* Center Nav Links */}
+        {/* Center: Desktop Nav Links (Horizontally Centered) */}
         <nav className="nav-links">
-          <button onClick={onExploreTemplates} className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button
+            onClick={() => handleLinkClick(onExploreTemplates)}
+            className="nav-link"
+          >
             <Compass size={16} />
-            Explore Templates
+            <span>Explore Templates</span>
           </button>
 
           {/* Website Details indicator / button */}
-          <button
-            onClick={onEditDetails}
-            className="nav-link"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              color: websiteDetails?.brandName ? 'var(--copper-medium)' : 'var(--text-secondary)',
-              fontWeight: websiteDetails?.brandName ? 700 : 500,
-            }}
-            title="Edit your website details and keywords"
-          >
-            <FileEdit size={16} />
-            {websiteDetails?.brandName ? (
-              <span>Brand: <strong>{websiteDetails.brandName}</strong></span>
-            ) : (
-              <span>Enter Details</span>
-            )}
-          </button>
-
-          {/* Clear details button — only visible when details exist */}
-          {websiteDetails?.brandName && onClearDetails && (
+          <div className="nav-brand-group">
             <button
-              onClick={onClearDetails}
-              className="nav-link"
-              title="Clear website details & start fresh"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 4,
-                color: 'var(--text-muted)',
-                fontSize: '0.8rem',
-                padding: '4px 8px',
-              }}
+              onClick={() => handleLinkClick(onEditDetails)}
+              className={`nav-link ${websiteDetails?.brandName ? 'nav-link-active-brand' : ''}`}
+              title="Edit your website details and keywords"
             >
-              <XCircle size={14} />
-              Clear
+              <FileEdit size={16} />
+              {websiteDetails?.brandName ? (
+                <span className="nav-brand-text">
+                  Brand: <strong>{websiteDetails.brandName}</strong>
+                </span>
+              ) : (
+                <span>Enter Details</span>
+              )}
             </button>
-          )}
 
-          <button onClick={onOpenHowItWorks} className="nav-link" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {websiteDetails?.brandName && onClearDetails && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClearDetails();
+                }}
+                className="nav-clear-btn"
+                title="Clear website details & start fresh"
+              >
+                <XCircle size={14} />
+              </button>
+            )}
+          </div>
+
+          <button
+            onClick={() => handleLinkClick(onOpenHowItWorks)}
+            className="nav-link"
+          >
             <HelpCircle size={16} />
-            How It Works
+            <span>How It Works</span>
           </button>
 
           <button
-            onClick={onOpenProjects}
+            onClick={() => handleLinkClick(onOpenProjects)}
             className="nav-link"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}
           >
             <FolderGit2 size={16} />
-            My Websites
+            <span>My Websites</span>
             {savedProjectsCount > 0 && (
-              <span style={{
-                background: 'var(--copper-medium)',
-                color: 'white',
-                borderRadius: '999px',
-                padding: '1px 6px',
-                fontSize: '0.7rem',
-                fontWeight: 700,
-              }}>
+              <span className="nav-projects-badge">
                 {savedProjectsCount}
               </span>
             )}
           </button>
         </nav>
 
-        {/* Right Nav Actions */}
+        {/* Right: Controls & Actions (Vertically Aligned 38px baseline) */}
         <div className="nav-controls">
           {/* AI Consultant Trigger */}
           {onOpenAiAgent && (
             <button
               onClick={onOpenAiAgent}
               className="btn-ai-nav"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 6,
-                padding: '7px 14px',
-                borderRadius: 'var(--radius-sm)',
-                background: 'linear-gradient(135deg, #2d2420 0%, #1a1614 100%)',
-                color: '#fdfbf7',
-                border: '1px solid var(--copper-medium)',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-              }}
               title="Open AI Website Setup & Management Agent"
             >
               <Sparkles size={14} color="var(--copper-light)" />
@@ -190,65 +177,116 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* User Account / Auth */}
           {currentUser ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 6,
-                  padding: '6px 12px',
-                  borderRadius: 'var(--radius-sm)',
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border-color)',
-                  fontSize: '0.82rem',
-                  fontWeight: 600,
-                }}
-              >
-                <div style={{ width: 22, height: 22, borderRadius: '50%', background: 'var(--copper-medium)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 800 }}>
+            <div className="user-profile-group">
+              <div className="user-badge-nav">
+                <div className="user-avatar-initial">
                   {currentUser.fullName.charAt(0).toUpperCase()}
                 </div>
-                <span>{currentUser.fullName}</span>
+                <span className="user-name-text">{currentUser.fullName}</span>
               </div>
               <button
                 onClick={onLogout}
-                style={{
-                  padding: '7px 10px',
-                  borderRadius: 'var(--radius-sm)',
-                  border: '1px solid var(--border-color)',
-                  background: 'var(--bg-card)',
-                  color: 'var(--text-muted)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  fontSize: '0.78rem',
-                }}
+                className="btn-logout-nav"
                 title="Log Out"
               >
-                <LogOut size={14} />
+                <LogOut size={15} />
               </button>
             </div>
           ) : (
             <button
               onClick={onOpenAuth}
-              style={{
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                color: 'var(--text-primary)',
-                padding: '8px 14px',
-                borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border-color)',
-                background: 'var(--bg-card)',
-              }}
+              className="btn-auth-nav"
             >
               Sign In
             </button>
           )}
 
           {/* Start Creating CTA */}
-          <button onClick={onStartCreating} className="btn-primary btn-sm">
-            Start Creating
+          <button
+            onClick={onStartCreating}
+            className="btn-primary btn-sm nav-cta-btn"
+          >
+            <span>Start Creating</span>
+          </button>
+
+          {/* Mobile Menu Hamburger Toggle */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="nav-mobile-toggle"
+            aria-label="Toggle Navigation Menu"
+            title="Menu"
+          >
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
+
+      {/* Mobile/Tablet Dropdown Navigation Drawer */}
+      {mobileMenuOpen && (
+        <div className="nav-mobile-drawer">
+          <div className="nav-mobile-links">
+            <button
+              onClick={() => handleLinkClick(onExploreTemplates)}
+              className="nav-mobile-link"
+            >
+              <Compass size={18} />
+              <span>Explore Templates</span>
+            </button>
+
+            <button
+              onClick={() => handleLinkClick(onEditDetails)}
+              className="nav-mobile-link"
+            >
+              <FileEdit size={18} />
+              <span>
+                {websiteDetails?.brandName
+                  ? `Brand: ${websiteDetails.brandName}`
+                  : 'Enter Website Details'}
+              </span>
+            </button>
+
+            <button
+              onClick={() => handleLinkClick(onOpenHowItWorks)}
+              className="nav-mobile-link"
+            >
+              <HelpCircle size={18} />
+              <span>How It Works</span>
+            </button>
+
+            <button
+              onClick={() => handleLinkClick(onOpenProjects)}
+              className="nav-mobile-link"
+            >
+              <FolderGit2 size={18} />
+              <span>My Websites</span>
+              {savedProjectsCount > 0 && (
+                <span className="nav-projects-badge">
+                  {savedProjectsCount}
+                </span>
+              )}
+            </button>
+
+            {onOpenAiAgent && (
+              <button
+                onClick={() => handleLinkClick(onOpenAiAgent)}
+                className="nav-mobile-link nav-mobile-ai"
+              >
+                <Sparkles size={18} color="var(--copper-light)" />
+                <span>AI Website Consultant</span>
+              </button>
+            )}
+
+            <button
+              onClick={() => handleLinkClick(onStartCreating)}
+              className="btn-primary"
+              style={{ width: '100%', marginTop: 8, justifyContent: 'center' }}
+            >
+              Start Creating
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
