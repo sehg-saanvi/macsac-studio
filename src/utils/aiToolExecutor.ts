@@ -100,8 +100,20 @@ export function executePlatformTool(
           }));
         }
 
-        const updatedPages = currentProject.pages.map((p) => {
-          if (p.id === targetPageId) {
+        let targetIndex = currentProject.pages.findIndex(
+          (p) => p.id === targetPageId || p.slug === targetPageId
+        );
+        if (targetIndex === -1) {
+          targetIndex = currentProject.pages.findIndex(
+            (p) => p.id === currentProject.activePageId
+          );
+        }
+        if (targetIndex === -1 && currentProject.pages.length > 0) {
+          targetIndex = 0;
+        }
+
+        const updatedPages = currentProject.pages.map((p, idx) => {
+          if (idx === targetIndex) {
             return { ...p, sections: [...p.sections, newSec] };
           }
           return p;
@@ -133,13 +145,38 @@ export function executePlatformTool(
         }
 
         const targetPageId = parameters.pageId || activePageId || currentProject.activePageId;
-        const page = currentProject.pages.find((p) => p.id === targetPageId) || currentProject.pages[0];
+        let foundPage =
+          currentProject.pages.find((p) => p.id === targetPageId || p.slug === targetPageId) ||
+          currentProject.pages[0];
 
-        // Locate section by sectionId or by sectionType
-        const targetSection =
-          page.sections.find((s) => s.id === parameters.sectionId) ||
-          page.sections.find((s) => s.type === parameters.sectionType || s.type === parameters.type) ||
-          page.sections[0];
+        // Locate section by sectionId or by sectionType across targeted page
+        let targetSection = foundPage?.sections.find(
+          (s) =>
+            s.id === parameters.sectionId ||
+            s.type === parameters.sectionType ||
+            s.type === parameters.type
+        );
+
+        // If not on target page, scan all project pages
+        if (!targetSection) {
+          for (const p of currentProject.pages) {
+            const match = p.sections.find(
+              (s) =>
+                s.id === parameters.sectionId ||
+                s.type === parameters.sectionType ||
+                s.type === parameters.type
+            );
+            if (match) {
+              targetSection = match;
+              foundPage = p;
+              break;
+            }
+          }
+        }
+
+        if (!targetSection && foundPage && foundPage.sections.length > 0) {
+          targetSection = foundPage.sections[0];
+        }
 
         if (!targetSection) {
           return { success: false, message: 'Target section could not be found.', changesMade: [] };
@@ -149,7 +186,7 @@ export function executePlatformTool(
         const changes: string[] = [];
 
         const updatedPages = currentProject.pages.map((p) => {
-          if (p.id === page.id) {
+          if (p.id === foundPage.id) {
             return {
               ...p,
               sections: p.sections.map((s) => {

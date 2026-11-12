@@ -58,7 +58,7 @@ function buildSystemPrompt(currentProject: any, activePageId?: string, agentCont
     const sectionsList = (activePage?.sections || [])
       .map(
         (s: any, i: number) =>
-          `  ${i + 1}. [ID: "${s.id}"] Type: "${s.type}" | Title: "${s.title}" | Items: ${s.items?.length || 0} | Layout: ${s.layoutVariant}`
+          `  ${i + 1}. [ID: "${s.id}"] Type: "${s.type}" | Title: "${s.title}" | Items: ${s.items?.length || 0} | Layout: ${s.layoutVariant || 'standard'}`
       )
       .join('\n');
 
@@ -67,7 +67,7 @@ function buildSystemPrompt(currentProject: any, activePageId?: string, agentCont
 - Active Template: "${currentProject.templateName}" (ID: ${currentProject.templateId})
 - Brand Name: "${currentProject.navigation?.brandName || 'Untitled'}"
 - Theme: "${currentProject.theme?.name}" (${currentProject.theme?.mode || 'light'} mode, primary: ${currentProject.theme?.primaryColor})
-- Total Pages: ${currentProject.pages?.length || 1} [${(currentProject.pages || []).map((p: any) => p.name).join(', ')}]
+- Total Pages: ${currentProject.pages?.length || 1} [${(currentProject.pages || []).map((p: any) => `${p.name} (/${p.slug})`).join(', ')}]
 - Active Page: "${activePage?.name || 'Home'}" (Slug: /${activePage?.slug || 'home'})
 `;
 
@@ -147,23 +147,26 @@ AVAILABLE PLATFORM TOOLS FOR EXECUTION:
 15. configure_integration(integrationType: "whatsapp" | "booking" | "newsletter" | "ecommerce_catalog", details)
 
 BEHAVIORAL GUIDELINES:
-1. Act as a thoughtful, professional website consultant. Never give lazy, generic chatbot answers.
-2. When the user shares their business idea or requirements (e.g. "I want a site for my clothing brand" or "I need a booking system"):
-   - First acknowledge and reflect their specific business context.
-   - Identify their key goals and recommend 2-4 specific features/tools available in Macsac Studio.
-   - Explain briefly WHY each tool benefits their business.
-   - Ask for permission to set them up: "Would you like me to configure these for you?"
-3. When the user confirms or requests an action (e.g., "Yes, set it up", "Add the booking section", "Change the theme to Dark", "Update the hero title to..."):
-   - EXECUTE the actual tool by providing the \`proposed_actions\` array.
-   - Include realistic, high-quality, professional copywriting in the parameters tailored to the user's business!
-   - Do NOT ask questions about information already known in the project or context.
-4. If an action is destructive (like deleting an entire page or removing a section), set \`requiresConfirmation: true\`.
-5. If the user asks for a capability outside Macsac Studio (e.g. server-side SQL database or Stripe raw webhook handler), explain that Macsac Studio supports front-end product showcases with direct WhatsApp ordering or external payment links, and suggest configuring that instead.
+1. Act as a thoughtful, professional website consultant.
+2. CONSULTATIVE WORKFLOW:
+   - When the user shares a new business concept without asking to execute immediately, offer consultative analysis with 2-3 recommendations and ask for permission to configure.
+3. IMMEDIATE EXECUTION & MULTI-TASKING:
+   - When the user asks you to create, set up, modify, or change features (e.g. "set it up", "add testimonials and an FAQ", "change the theme to dark and add WhatsApp ordering"), you MUST EXECUTE THEM IMMEDIATELY via \`proposed_actions\`.
+   - IMPORTANT: If the user requests MULTIPLE tasks or changes in a single message, YOU MUST PROVIDE AN ACTION FOR EACH TASK IN \`proposed_actions\`! Do NOT stop at only one action.
+   - For example, if user asks: "Add testimonials, add FAQ, and change theme to obsidian", your \`proposed_actions\` array MUST contain 3 actions: [add_section(testimonials), add_section(faq), apply_theme(obsidian-cyber)].
+4. COPYWRITING QUALITY:
+   - Always write customized, realistic, high-grade copywriting tailored directly to the user's specific business. Never use generic placeholder text like "Lorem ipsum" or "Section Title".
+5. CONTINUOUS CONTEXT & EFFICIENCY:
+   - Build upon previous actions. If you already created a page or section in an earlier prompt, reference its ID or type.
+   - Keep actions focused and direct. Do not ask redundant questions if information was already provided or is known in the project context.
+6. SAFETY:
+   - Set \`requiresConfirmation: true\` ONLY for destructive actions (deleting an entire page or removing a section).
+   - Set \`requiresConfirmation: false\` for adding sections, updating styles, changing themes, and configuring integrations so they apply smoothly.
 
 RESPONSE FORMAT:
 You MUST respond with a valid JSON object matching this schema:
 {
-  "message": "Conversational explanation to the user in friendly, consultative tone...",
+  "message": "Conversational explanation to the user in a friendly, consultative tone...",
   "recommendations": [
     {
       "id": "rec-1",
@@ -178,8 +181,8 @@ You MUST respond with a valid JSON object matching this schema:
     {
       "id": "act-1",
       "tool": "add_section",
-      "name": "Add Bakery Showcase",
-      "description": "Adding a curated product section with sourdough breads and croissants",
+      "name": "Add Section Name",
+      "description": "Description of modification",
       "parameters": { ... },
       "requiresConfirmation": false
     }
@@ -191,44 +194,106 @@ You MUST respond with a valid JSON object matching this schema:
   }
 }
 
-Do not wrap in anything other than the JSON object, or format as standard markdown code block \`\`\`json { ... } \`\`\`.
+Do not wrap in anything other than the JSON object or standard markdown \`\`\`json { ... } \`\`\`.
 `;
 }
 
+/**
+ * Resilient JSON parser that handles markdown fences, think tokens, trailing commas,
+ * and truncated LLM output without throwing syntax errors.
+ */
 function parseLlmOutput(rawText: string): any {
   if (!rawText || !rawText.trim()) {
     return {
-      message: 'I understand your request. Let me assist you with setting up your website.',
+      message: 'I have analyzed your request and updated the website.',
       recommendations: [],
       proposed_actions: [],
     };
   }
 
+  // 1. Remove thinking tokens e.g. <think>...</think>
+  let clean = rawText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+
+  // 2. Try direct JSON parse
   try {
-    return JSON.parse(rawText.trim());
-  } catch {
-    const jsonMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    if (jsonMatch && jsonMatch[1]) {
-      try {
-        return JSON.parse(jsonMatch[1].trim());
-      } catch {}
-    }
+    return JSON.parse(clean);
+  } catch {}
 
-    const firstBrace = rawText.indexOf('{');
-    const lastBrace = rawText.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
-      try {
-        const potentialJson = rawText.substring(firstBrace, lastBrace + 1);
-        return JSON.parse(potentialJson);
-      } catch {}
+  // 3. Extract JSON from markdown code block ```json ... ```
+  const codeBlockMatch = clean.match(/```(?:json)?\s*([\s\S]*?)\s*```/i);
+  if (codeBlockMatch && codeBlockMatch[1]) {
+    try {
+      return JSON.parse(codeBlockMatch[1].trim());
+    } catch {
+      clean = codeBlockMatch[1].trim();
     }
-
-    return {
-      message: rawText.replace(/```(?:json)?/g, '').replace(/```/g, '').trim(),
-      recommendations: [],
-      proposed_actions: [],
-    };
   }
+
+  // 4. Find first { and last }
+  const firstBrace = clean.indexOf('{');
+  const lastBrace = clean.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    let candidate = clean.substring(firstBrace, lastBrace + 1);
+    try {
+      return JSON.parse(candidate);
+    } catch {
+      // Strip trailing commas before } or ]
+      candidate = candidate.replace(/,\s*([}\]])/g, '$1');
+      try {
+        return JSON.parse(candidate);
+      } catch {}
+    }
+  }
+
+  // 5. Incomplete / truncated JSON repair (in case max tokens was reached mid-stream)
+  if (firstBrace !== -1) {
+    let partial = clean.substring(firstBrace);
+    partial = partial.replace(/,\s*([}\]])/g, '$1').replace(/,\s*$/, '');
+
+    let openBraces = 0;
+    let openBrackets = 0;
+    let inString = false;
+    let escape = false;
+
+    for (let i = 0; i < partial.length; i++) {
+      const c = partial[i];
+      if (c === '\\' && inString) {
+        escape = !escape;
+        continue;
+      }
+      if (c === '"' && !escape) {
+        inString = !inString;
+      }
+      if (!inString) {
+        if (c === '{') openBraces++;
+        else if (c === '}') openBraces--;
+        else if (c === '[') openBrackets++;
+        else if (c === ']') openBrackets--;
+      }
+      escape = false;
+    }
+
+    if (inString) partial += '"';
+    while (openBrackets > 0) {
+      partial += ']';
+      openBrackets--;
+    }
+    while (openBraces > 0) {
+      partial += '}';
+      openBraces--;
+    }
+
+    try {
+      return JSON.parse(partial);
+    } catch {}
+  }
+
+  // 6. Fallback clean response
+  return {
+    message: clean.replace(/```(?:json)?/gi, '').replace(/```/g, '').trim(),
+    recommendations: [],
+    proposed_actions: [],
+  };
 }
 
 export async function aiAgentMiddleware(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -261,16 +326,25 @@ export async function aiAgentMiddleware(req: IncomingMessage, res: ServerRespons
 
     const systemPrompt = buildSystemPrompt(currentProject, activePageId, agentContext);
 
+    // Keep up to the last 14 messages to support extended continuous conversations
     const formattedMessages = [
       { role: 'system', content: systemPrompt },
-      ...messages.slice(-10).map((m: any) => ({
-        role: m.role === 'assistant' ? 'assistant' : 'user',
-        content: m.content || '',
-      })),
+      ...messages.slice(-14).map((m: any) => {
+        let content = m.content || '';
+        // If content is excessively long, truncate slightly to protect token limits
+        if (content.length > 2500) {
+          content = content.substring(0, 2500) + '...';
+        }
+        return {
+          role: m.role === 'assistant' ? 'assistant' : 'user',
+          content,
+        };
+      }),
     ];
 
     const modelName = process.env.AI_MODEL || DEFAULT_MODEL;
 
+    // Use 4096 max_tokens to ensure multi-task JSON outputs are never cut off
     const apiResponse = await fetch(NVIDIA_API_URL, {
       method: 'POST',
       headers: {
@@ -280,8 +354,8 @@ export async function aiAgentMiddleware(req: IncomingMessage, res: ServerRespons
       body: JSON.stringify({
         model: modelName,
         messages: formattedMessages,
-        temperature: 0.4,
-        max_tokens: 1200,
+        temperature: 0.3,
+        max_tokens: 4096,
       }),
     });
 
@@ -309,7 +383,7 @@ export async function aiAgentMiddleware(req: IncomingMessage, res: ServerRespons
     res.setHeader('Content-Type', 'application/json');
     res.end(
       JSON.stringify({
-        message: parsedOutput.message || 'I have analyzed your request.',
+        message: parsedOutput.message || 'I have analyzed your request and updated the website.',
         recommendations: parsedOutput.recommendations || [],
         proposed_actions: parsedOutput.proposed_actions || parsedOutput.proposedActions || [],
         updatedContext: parsedOutput.updatedContext || {},
@@ -327,4 +401,3 @@ export async function aiAgentMiddleware(req: IncomingMessage, res: ServerRespons
     );
   }
 }
-

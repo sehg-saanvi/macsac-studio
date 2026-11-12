@@ -42,6 +42,8 @@ interface AiAgentDrawerProps {
   onLaunchProject?: (newProject: Project) => void;
   websiteDetails?: UserWebsiteDetails | null;
   onNavigatePage?: (slug: string) => void;
+  hideFloatingTrigger?: boolean;
+  inEditor?: boolean;
 }
 
 const STORAGE_CHAT_KEY = 'macsac_studio_ai_agent_chat_v2';
@@ -152,6 +154,8 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
   onLaunchProject,
   websiteDetails,
   onNavigatePage,
+  hideFloatingTrigger = false,
+  inEditor = false,
 }) => {
   const [messages, setMessages] = useState<AgentMessage[]>(() => {
     try {
@@ -258,9 +262,21 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: updatedMessages.map((m) => ({ role: m.role, content: m.content })),
-          currentProject,
-          activePageId: activePageId || currentProject?.activePageId,
+          messages: updatedMessages.map((m) => {
+            let content = m.content || '';
+            if (m.role === 'assistant' && m.proposedActions && m.proposedActions.length > 0) {
+              const completedList = m.proposedActions
+                .filter((a) => a.status === 'completed')
+                .map((a) => a.name || a.tool)
+                .join(', ');
+              if (completedList) {
+                content += `\n[Previously Configured: ${completedList}]`;
+              }
+            }
+            return { role: m.role, content };
+          }),
+          currentProject: currentProjectRef.current || currentProject,
+          activePageId: activePageId || currentProjectRef.current?.activePageId || currentProject?.activePageId,
           agentContext,
         }),
       });
@@ -274,7 +290,7 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
       const assistantMessage: AgentMessage = {
         id: `msg-${Date.now()}`,
         role: 'assistant',
-        content: data.message || 'I have analyzed your request.',
+        content: data.message || 'I have analyzed your request and updated the website.',
         timestamp: Date.now(),
         recommendations: data.recommendations || [],
         proposedActions: (data.proposed_actions || []).map((a: any, i: number) => ({
@@ -297,15 +313,25 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
         }));
       }
 
-      // If proposed actions don't require confirmation, execute them automatically
+      // If proposed actions don't require confirmation, execute them automatically in sequence
       if (
         assistantMessage.proposedActions &&
         assistantMessage.proposedActions.length > 0
       ) {
+        let hasSelectTemplate = false;
         for (const action of assistantMessage.proposedActions) {
           if (!action.requiresConfirmation) {
-            await handleExecuteAction(assistantMessage.id, action);
+            if (action.tool === 'select_template') {
+              hasSelectTemplate = true;
+            }
+            // Defer launch until all actions in the batch are executed
+            await handleExecuteAction(assistantMessage.id, action, false);
           }
+        }
+
+        // If template selection was executed on the home page, launch into editor with full batch configured
+        if (hasSelectTemplate && onLaunchProject && currentProjectRef.current) {
+          onLaunchProject(currentProjectRef.current);
         }
       }
     } catch (err: any) {
@@ -324,7 +350,11 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
     }
   };
 
-  const handleExecuteAction = async (messageId: string, action: ProposedAction) => {
+  const handleExecuteAction = async (
+    messageId: string,
+    action: ProposedAction,
+    shouldLaunchTemplate: boolean = true
+  ) => {
     setExecutingActionId(action.id);
 
     // Update action status to executing
@@ -342,57 +372,80 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
       })
     );
 
-    await new Promise((r) => setTimeout(r, 450)); // smooth visual feedback
+    await new Promise((r) => setTimeout(r, 400)); // smooth visual feedback
 
-    const targetProject = currentProjectRef.current || currentProject;
-    const result = executePlatformTool(
-      action.tool,
-      action.parameters,
-      targetProject,
-      activePageId
-    );
+    try {
+      const targetProject = currentProjectRef.current || currentProject;
+      const result = executePlatformTool(
+        action.tool,
+        action.parameters,
+        targetProject,
+        activePageId
+      );
 
-    // Update action status to completed or failed
-    setMessages((prev) =>
-      prev.map((m) => {
-        if (m.id === messageId && m.proposedActions) {
-          return {
-            ...m,
-            proposedActions: m.proposedActions.map((a) =>
-              a.id === action.id
-                ? {
-                    ...a,
-                    status: result.success ? 'completed' : 'failed',
-                    resultMessage: result.message,
-                  }
-                : a
-            ),
-          };
+      // Update action status to completed or failed
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id === messageId && m.proposedActions) {
+            return {
+              ...m,
+              proposedActions: m.proposedActions.map((a) =>
+                a.id === action.id
+                  ? {
+                      ...a,
+                      status: result.success ? 'completed' : 'failed',
+                      resultMessage: result.message,
+                    }
+                  : a
+              ),
+            };
+          }
+          return m;
+        })
+      );
+
+      if (result.success && result.updatedProject) {
+        currentProjectRef.current = result.updatedProject;
+        // If we are currently in Editor, apply project updates live
+        if (onUpdateProject) {
+          onUpdateProject(result.updatedProject);
         }
-        return m;
-      })
-    );
+        // If action was template selection and we are in Home view, launch into editor
+        if (shouldLaunchTemplate && action.tool === 'select_template' && onLaunchProject) {
+          onLaunchProject(result.updatedProject);
+        }
 
-    setExecutingActionId(null);
-
-    if (result.success && result.updatedProject) {
-      currentProjectRef.current = result.updatedProject;
-      // If we are currently in Editor, apply project updates live
-      if (onUpdateProject) {
-        onUpdateProject(result.updatedProject);
+        // Update agent context memory
+        setAgentContext((prev) => ({
+          ...prev,
+          configuredFeatures: Array.from(
+            new Set([...(prev.configuredFeatures || []), action.name || action.tool])
+          ),
+        }));
       }
-      // If action was template selection and we are in Home view, launch into editor
-      if (action.tool === 'select_template' && onLaunchProject) {
-        onLaunchProject(result.updatedProject);
-      }
-
-      // Update agent context memory
-      setAgentContext((prev) => ({
-        ...prev,
-        configuredFeatures: Array.from(
-          new Set([...(prev.configuredFeatures || []), action.name || action.tool])
-        ),
-      }));
+    } catch (actionErr: any) {
+      console.error('[Action Execution Error]:', actionErr);
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m.id === messageId && m.proposedActions) {
+            return {
+              ...m,
+              proposedActions: m.proposedActions.map((a) =>
+                a.id === action.id
+                  ? {
+                      ...a,
+                      status: 'failed',
+                      resultMessage: `Execution error: ${actionErr.message || String(actionErr)}`,
+                    }
+                  : a
+              ),
+            };
+          }
+          return m;
+        })
+      );
+    } finally {
+      setExecutingActionId(null);
     }
   };
 
@@ -440,14 +493,14 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
 
   return (
     <>
-      {/* ── Floating Action Trigger (When Drawer is Closed) ── */}
-      {!isOpen && (
+      {/* ── Floating Action Trigger (When Drawer is Closed & Not in Editor) ── */}
+      {!isOpen && !hideFloatingTrigger && (
         <button
           onClick={onOpen}
           title="Open AI Website Setup & Management Agent"
           style={{
             position: 'fixed',
-            bottom: 24,
+            bottom: inEditor ? 56 : 24,
             right: 24,
             zIndex: 9999,
             display: 'flex',
@@ -498,7 +551,7 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
           id="macsac-ai-agent-drawer"
           style={{
             position: 'fixed',
-            bottom: isMinimized ? 20 : 0,
+            bottom: isMinimized ? (inEditor ? 54 : 20) : 0,
             right: isMinimized ? 20 : 0,
             top: isMinimized ? 'auto' : 0,
             width: isMinimized ? 340 : 'min(460px, 100vw)',

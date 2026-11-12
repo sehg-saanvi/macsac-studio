@@ -729,6 +729,8 @@ export const EditorView: React.FC<EditorViewProps> = ({
         activePageId={activePage?.id}
         onUpdateProject={(updated) => pushState(updated)}
         onNavigatePage={handleSelectPage}
+        hideFloatingTrigger={true}
+        inEditor={true}
       />
 
       {/* Publish Simulation Modal */}
