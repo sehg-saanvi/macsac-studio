@@ -7,6 +7,7 @@ import {
   WebsiteTheme,
 } from '../types';
 import { WEBSITE_TEMPLATES } from '../data/templatesData';
+import { getAllActiveTemplates } from './templateManager';
 import { THEME_PRESETS } from '../data/themePresets';
 import { createNewSection } from '../data/defaultSections';
 import { createProjectFromTemplate, saveProject } from './storage';
@@ -32,9 +33,13 @@ export function executePlatformTool(
       /* ── 1. Select Template & Create / Switch Project ── */
       case 'select_template': {
         const { templateId, brandName, keywords } = parameters;
-        const matched = WEBSITE_TEMPLATES.find(
-          (t) => t.id.toLowerCase() === (templateId || '').toLowerCase()
-        ) || WEBSITE_TEMPLATES[0];
+        const availableTemplates = getAllActiveTemplates();
+        const matched =
+          availableTemplates.find(
+            (t) => t.id.toLowerCase() === (templateId || '').toLowerCase()
+          ) ||
+          availableTemplates[0] ||
+          WEBSITE_TEMPLATES[0];
 
         const userDetails = {
           brandName: brandName || currentProject?.name || matched.name,

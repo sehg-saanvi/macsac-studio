@@ -3,7 +3,7 @@ import path from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
 const NVIDIA_API_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
-const DEFAULT_MODEL = 'nvidia/nemotron-3.5-bolt-e4b';
+const DEFAULT_MODEL = 'nvidia/nemotron-3.5-super-vl-120b-a12b';
 
 /**
  * Loads NVIDIA API key securely from environment variables or .env file.

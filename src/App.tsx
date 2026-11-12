@@ -32,6 +32,8 @@ import { ProjectsDrawer } from './components/ProjectsDrawer';
 import { OnboardingModal } from './components/OnboardingModal';
 import { AuthModal } from './components/AuthModal';
 import { AiAgentDrawer } from './components/AiAgentDrawer';
+import { AdminPanelModal } from './components/AdminPanelModal';
+import { getAllActiveTemplates } from './utils/templateManager';
 
 export function App() {
   // Theme state: defaults to light (synced to body data-theme)
@@ -49,9 +51,13 @@ export function App() {
   // User submitted website details & keywords (Step 1)
   const [websiteDetails, setWebsiteDetails] = useState<UserWebsiteDetails | null>(null);
 
+  // Templates list (merged with custom admin templates & overrides)
+  const [activeTemplates, setActiveTemplates] = useState<WebsiteTemplate[]>(() => getAllActiveTemplates());
+
   // Modals state
   const [onboardingModalOpen, setOnboardingModalOpen] = useState(false);
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [adminModalOpen, setAdminModalOpen] = useState(false);
   const [pendingCustomizeTemplate, setPendingCustomizeTemplate] = useState<WebsiteTemplate | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<WebsiteTemplate | null>(null);
   const [exportProject, setExportProject] = useState<Project | null>(null);
@@ -238,6 +244,7 @@ export function App() {
             onOpenHowItWorks={handleScrollToHowItWorks}
             onStartCreating={handleStartCreating}
             onOpenAiAgent={() => setAiAgentOpen(true)}
+            onOpenAdmin={() => setAdminModalOpen(true)}
             currentUser={currentUser}
             onOpenAuth={() => setAuthModalOpen(true)}
             onLogout={handleLogout}
@@ -261,7 +268,7 @@ export function App() {
 
             {/* Curated Showcases (Popular, Business, Portfolio, Categories) */}
             <CuratedSections
-              templates={WEBSITE_TEMPLATES}
+              templates={activeTemplates}
               onPreview={(t) => {
                 setPreviewFromCatalog(false);
                 setPreviewTemplate(t);
@@ -351,7 +358,7 @@ export function App() {
       <TemplateCatalogModal
         isOpen={catalogModalOpen}
         onClose={() => setCatalogModalOpen(false)}
-        templates={WEBSITE_TEMPLATES}
+        templates={activeTemplates}
         filters={filters}
         onFilterChange={handleFilterUpdate}
         onResetFilters={handleResetFilters}
@@ -372,6 +379,24 @@ export function App() {
         }}
         savedScrollY={catalogScrollY}
         onSaveScroll={setCatalogScrollY}
+      />
+
+      {/* Admin Control Panel & Template Upload Modal */}
+      <AdminPanelModal
+        isOpen={adminModalOpen}
+        onClose={() => setAdminModalOpen(false)}
+        onPreviewTemplate={(template) => {
+          setPreviewFromCatalog(false);
+          setPreviewTemplate(template);
+          setAdminModalOpen(false);
+        }}
+        onLaunchTemplate={(template) => {
+          setAdminModalOpen(false);
+          launchPersonalizedEditor(template);
+        }}
+        onTemplatesChanged={() => {
+          setActiveTemplates(getAllActiveTemplates());
+        }}
       />
 
       {/* Full-Page Website Preview Modal (Does not require sign-up) */}

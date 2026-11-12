@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   ArrowRight,
+  Shield,
 } from 'lucide-react';
 import { UserAccount, UserWebsiteDetails } from '../types';
 
@@ -25,6 +26,7 @@ interface NavbarProps {
   onOpenHowItWorks: () => void;
   onStartCreating: () => void;
   onOpenAiAgent?: () => void;
+  onOpenAdmin?: () => void;
   currentUser: UserAccount | null;
   onOpenAuth: () => void;
   onLogout: () => void;
@@ -43,6 +45,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenHowItWorks,
   onStartCreating,
   onOpenAiAgent,
+  onOpenAdmin,
   currentUser,
   onOpenAuth,
   onLogout,
@@ -153,6 +156,18 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right: Controls & Actions (Vertically Aligned 38px baseline) */}
         <div className="nav-controls">
+          {/* Admin Panel Trigger */}
+          {onOpenAdmin && (
+            <button
+              onClick={onOpenAdmin}
+              className="btn-admin-nav"
+              title="Open Admin Control Panel"
+            >
+              <Shield size={14} color="var(--copper-medium)" />
+              <span>Admin</span>
+            </button>
+          )}
+
           {/* AI Consultant Trigger */}
           {onOpenAiAgent && (
             <button
@@ -273,6 +288,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Sparkles size={18} color="var(--copper-light)" />
                 <span>AI Website Consultant</span>
+              </button>
+            )}
+
+            {onOpenAdmin && (
+              <button
+                onClick={() => handleLinkClick(onOpenAdmin)}
+                className="nav-mobile-link"
+              >
+                <Shield size={18} color="var(--copper-medium)" />
+                <span>Admin Control Panel</span>
               </button>
             )}
 

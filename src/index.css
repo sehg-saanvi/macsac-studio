@@ -405,6 +405,30 @@ input, textarea, select {
   flex-shrink: 0;
 }
 
+.btn-admin-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-sizing: border-box;
+  line-height: 1;
+}
+
+.btn-admin-nav:hover {
+  border-color: var(--copper-medium);
+  color: var(--copper-medium);
+  transform: translateY(-1px);
+}
+
 .btn-ai-nav {
   display: inline-flex;
   align-items: center;
