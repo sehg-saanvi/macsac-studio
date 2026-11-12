@@ -78,6 +78,70 @@ const QUICK_PROMPTS = [
   'Change the theme to Obsidian Dark with neon cyan accents',
 ];
 
+function renderFormattedMessage(content: string, isUser: boolean) {
+  if (isUser) {
+    return content;
+  }
+
+  const lines = content.split('\n');
+  return lines.map((line, idx) => {
+    const trimmed = line.trim();
+    const isBullet = trimmed.startsWith('- ') || trimmed.startsWith('* ');
+    const bulletText = isBullet ? trimmed.slice(2) : line;
+
+    // Parse bold markdown **bold**
+    const parts = bulletText.split(/(\*\*[^*]+\*\*)/g);
+    const parsedLine = parts.map((part, pIdx) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return (
+          <strong key={pIdx} style={{ fontWeight: 700, color: '#1a1614' }}>
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      return part;
+    });
+
+    if (isBullet) {
+      return (
+        <div
+          key={idx}
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: 7,
+            marginTop: 3,
+            marginBottom: 3,
+            paddingLeft: 2,
+          }}
+        >
+          <span
+            style={{
+              width: 5,
+              height: 5,
+              borderRadius: '50%',
+              backgroundColor: COLOR_COPPER,
+              marginTop: 7,
+              flexShrink: 0,
+            }}
+          />
+          <span style={{ flex: 1 }}>{parsedLine}</span>
+        </div>
+      );
+    }
+
+    if (!trimmed) {
+      return <div key={idx} style={{ height: 6 }} />;
+    }
+
+    return (
+      <div key={idx} style={{ marginBottom: 2 }}>
+        {parsedLine}
+      </div>
+    );
+  });
+}
+
 export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
   isOpen,
   onClose,
@@ -119,6 +183,11 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const currentProjectRef = useRef<Project | null>(currentProject);
+
+  useEffect(() => {
+    currentProjectRef.current = currentProject;
+  }, [currentProject]);
 
   // Sync state to localStorage
   useEffect(() => {
@@ -275,10 +344,11 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
 
     await new Promise((r) => setTimeout(r, 450)); // smooth visual feedback
 
+    const targetProject = currentProjectRef.current || currentProject;
     const result = executePlatformTool(
       action.tool,
       action.parameters,
-      currentProject,
+      targetProject,
       activePageId
     );
 
@@ -306,6 +376,7 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
     setExecutingActionId(null);
 
     if (result.success && result.updatedProject) {
+      currentProjectRef.current = result.updatedProject;
       // If we are currently in Editor, apply project updates live
       if (onUpdateProject) {
         onUpdateProject(result.updatedProject);
@@ -676,11 +747,10 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
                             : '0 2px 10px rgba(0,0,0,0.04)',
                           fontSize: '0.86rem',
                           lineHeight: 1.55,
-                          whiteSpace: 'pre-wrap',
                           wordBreak: 'break-word',
                         }}
                       >
-                        {msg.content}
+                        {renderFormattedMessage(msg.content, isUser)}
                       </div>
 
                       {/* Structured Recommendations Card */}
@@ -1096,3 +1166,4 @@ export const AiAgentDrawer: React.FC<AiAgentDrawerProps> = ({
     </>
   );
 };
+

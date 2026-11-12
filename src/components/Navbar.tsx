@@ -81,7 +81,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <Compass size={16} />
             Explore Templates
           </button>
-          
+
           {/* Website Details indicator / button */}
           <button
             onClick={onEditDetails}
@@ -128,9 +128,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             How It Works
           </button>
 
-          <button 
-            onClick={onOpenProjects} 
-            className="nav-link" 
+          <button
+            onClick={onOpenProjects}
+            className="nav-link"
             style={{ display: 'flex', alignItems: 'center', gap: 6, position: 'relative' }}
           >
             <FolderGit2 size={16} />

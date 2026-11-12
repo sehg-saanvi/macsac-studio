@@ -65,3 +65,4 @@ export interface AgentChatResponse {
   updatedContext?: Partial<AgentContext>;
   error?: string;
 }
+
