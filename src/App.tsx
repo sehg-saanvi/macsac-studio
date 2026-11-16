@@ -102,6 +102,34 @@ export function App() {
     setSavedProjects(getSavedProjects());
   }, []);
 
+  // Listen for secret admin route (#admin or ?admin=true) and hotkey (Ctrl+Shift+A or Alt+A)
+  useEffect(() => {
+    const checkAdminRoute = () => {
+      const hash = window.location.hash.toLowerCase();
+      const search = window.location.search.toLowerCase();
+      if (hash === '#admin' || hash === '#/admin' || hash === '#admin-login' || search.includes('admin=')) {
+        setAdminModalOpen(true);
+      }
+    };
+
+    checkAdminRoute();
+    window.addEventListener('hashchange', checkAdminRoute);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'a') || (e.altKey && e.key.toLowerCase() === 'a')) {
+        e.preventDefault();
+        setAdminModalOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('hashchange', checkAdminRoute);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
+
   const refreshSavedProjects = () => {
     setSavedProjects(getSavedProjects());
   };
@@ -244,7 +272,6 @@ export function App() {
             onOpenHowItWorks={handleScrollToHowItWorks}
             onStartCreating={handleStartCreating}
             onOpenAiAgent={() => setAiAgentOpen(true)}
-            onOpenAdmin={() => setAdminModalOpen(true)}
             currentUser={currentUser}
             onOpenAuth={() => setAuthModalOpen(true)}
             onLogout={handleLogout}
@@ -294,6 +321,7 @@ export function App() {
           <Footer
             onExploreTemplates={handleScrollToGallery}
             onOpenHowItWorks={handleScrollToHowItWorks}
+            onOpenAdmin={() => setAdminModalOpen(true)}
           />
         </>
       ) : (
@@ -384,7 +412,12 @@ export function App() {
       {/* Admin Control Panel & Template Upload Modal */}
       <AdminPanelModal
         isOpen={adminModalOpen}
-        onClose={() => setAdminModalOpen(false)}
+        onClose={() => {
+          setAdminModalOpen(false);
+          if (window.location.hash.toLowerCase().includes('admin')) {
+            history.replaceState(null, '', window.location.pathname);
+          }
+        }}
         onPreviewTemplate={(template) => {
           setPreviewFromCatalog(false);
           setPreviewTemplate(template);

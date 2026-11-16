@@ -4,6 +4,119 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 
 const NVIDIA_API_URL = 'https://integrate.api.nvidia.com/v1/chat/completions';
 const DEFAULT_MODEL = 'nvidia/nemotron-3.5-super-vl-120b-a12b';
+const FALLBACK_MODEL = 'meta/llama-3.1-70b-instruct';
+
+// Concurrency queue to protect against NVIDIA API burst rate limits (429)
+let activeNvidiaRequests = 0;
+const MAX_CONCURRENT_REQUESTS = 2;
+const requestQueue: Array<() => void> = [];
+
+function acquireQueueSlot(): Promise<void> {
+  return new Promise((resolve) => {
+    if (activeNvidiaRequests < MAX_CONCURRENT_REQUESTS) {
+      activeNvidiaRequests++;
+      resolve();
+    } else {
+      requestQueue.push(() => {
+        activeNvidiaRequests++;
+        resolve();
+      });
+    }
+  });
+}
+
+function releaseQueueSlot(): void {
+  activeNvidiaRequests--;
+  if (requestQueue.length > 0) {
+    const next = requestQueue.shift();
+    if (next) next();
+  }
+}
+
+async function callNvidiaWithRetry(
+  apiKey: string,
+  modelName: string,
+  formattedMessages: any[],
+  maxRetries = 3
+): Promise<{ ok: boolean; status: number; data?: any; errorText?: string }> {
+  let attempt = 0;
+  let currentModel = modelName;
+
+  while (attempt < maxRetries) {
+    attempt++;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 65000); // 65-second timeout protection
+
+    try {
+      const response = await fetch(NVIDIA_API_URL, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: currentModel,
+          messages: formattedMessages,
+          temperature: 0.3,
+          max_tokens: 4096,
+        }),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (response.ok) {
+        const data = await response.json();
+        return { ok: true, status: response.status, data };
+      }
+
+      const errorText = await response.text();
+      console.warn(
+        `[AI Agent Middleware] Attempt ${attempt}/${maxRetries} failed with status ${response.status} (model: ${currentModel}):`,
+        errorText.slice(0, 160)
+      );
+
+      // If rate limited (429) or server temporarily overloaded (503, 504)
+      if (response.status === 429 || response.status === 503 || response.status === 504) {
+        // If this was attempt >= 2 and still hitting rate limits, switch to fast fallback model
+        if (attempt >= 2 && currentModel !== FALLBACK_MODEL) {
+          console.info(`[AI Agent Middleware] Switching to fallback model: ${FALLBACK_MODEL}`);
+          currentModel = FALLBACK_MODEL;
+        }
+
+        const retryAfterHeader = response.headers.get('retry-after');
+        const waitMs = retryAfterHeader
+          ? Math.min(parseInt(retryAfterHeader, 10) * 1000, 6000)
+          : Math.min(attempt * 1500, 5000);
+
+        console.info(`[AI Agent Middleware] Backing off for ${waitMs}ms before retry...`);
+        await new Promise((r) => setTimeout(r, waitMs));
+        continue;
+      }
+
+      // If client error other than 429 (e.g. 400), return error directly
+      return { ok: false, status: response.status, errorText };
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      const isAbort = err.name === 'AbortError';
+      console.warn(
+        `[AI Agent Middleware] Attempt ${attempt}/${maxRetries} caught exception (${isAbort ? 'Timeout' : err.message})`
+      );
+
+      if (attempt < maxRetries) {
+        await new Promise((r) => setTimeout(r, attempt * 1200));
+        continue;
+      }
+      return {
+        ok: false,
+        status: 504,
+        errorText: isAbort ? 'AI reasoning service timed out after 65 seconds' : err.message,
+      };
+    }
+  }
+
+  return { ok: false, status: 502, errorText: 'All retry attempts exhausted.' };
+}
 
 /**
  * Loads NVIDIA API key securely from environment variables or .env file.
@@ -344,29 +457,23 @@ export async function aiAgentMiddleware(req: IncomingMessage, res: ServerRespons
 
     const modelName = process.env.AI_MODEL || DEFAULT_MODEL;
 
-    // Use 4096 max_tokens to ensure multi-task JSON outputs are never cut off
-    const apiResponse = await fetch(NVIDIA_API_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: modelName,
-        messages: formattedMessages,
-        temperature: 0.3,
-        max_tokens: 4096,
-      }),
-    });
+    // Acquire concurrency queue slot to prevent 429 burst rate limits
+    await acquireQueueSlot();
 
-    if (!apiResponse.ok) {
-      const errorText = await apiResponse.text();
-      console.error('[AI Agent Middleware] NVIDIA API Error:', apiResponse.status, errorText);
-      res.statusCode = 502;
+    let result;
+    try {
+      result = await callNvidiaWithRetry(apiKey, modelName, formattedMessages, 3);
+    } finally {
+      releaseQueueSlot();
+    }
+
+    if (!result.ok || !result.data) {
+      console.error('[AI Agent Middleware] Final Failure:', result.status, result.errorText);
+      res.statusCode = result.status >= 400 && result.status < 600 ? result.status : 502;
       res.setHeader('Content-Type', 'application/json');
       res.end(
         JSON.stringify({
-          error: `NVIDIA NIM API responded with status ${apiResponse.status}`,
+          error: `AI Engine responded with status ${result.status}`,
           message:
             'I encountered a temporary connection issue while contacting the AI reasoning engine. Please try your request again in a moment.',
         })
@@ -374,7 +481,7 @@ export async function aiAgentMiddleware(req: IncomingMessage, res: ServerRespons
       return;
     }
 
-    const apiData = (await apiResponse.json()) as any;
+    const apiData = result.data as any;
     const rawOutput = apiData.choices?.[0]?.message?.content || '';
 
     const parsedOutput = parseLlmOutput(rawOutput);

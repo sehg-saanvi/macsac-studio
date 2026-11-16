@@ -23,6 +23,9 @@ import {
   Code,
   Sliders,
   CheckCircle2,
+  Lock,
+  LogOut,
+  User,
 } from 'lucide-react';
 import {
   WebsiteTemplate,
@@ -131,6 +134,51 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [testPrompt, setTestPrompt] = useState('I want an online organic coffee roastery with direct delivery');
   const [testResponse, setTestResponse] = useState<any>(null);
   const [isTestingAi, setIsTestingAi] = useState(false);
+
+  // Authentication Gate State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('macsac_admin_auth') === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [loginUsername, setLoginUsername] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError('');
+    const user = loginUsername.trim().toLowerCase();
+    const pass = loginPassword.trim();
+
+    if (
+      (user === 'admin' || user === 'macsac_admin') &&
+      (pass === 'macsac@admin2026' || pass === 'macsac2026' || pass === 'admin123')
+    ) {
+      try {
+        sessionStorage.setItem('macsac_admin_auth', 'true');
+      } catch {}
+      setIsAuthenticated(true);
+      setLoginError('');
+      showNotification('Administrator authenticated. Welcome to MACSAC Control Center.');
+    } else {
+      setLoginError('Invalid administrator credentials. Please check your username and password.');
+    }
+  };
+
+  const handleAdminLogout = () => {
+    try {
+      sessionStorage.removeItem('macsac_admin_auth');
+    } catch {}
+    setIsAuthenticated(false);
+    setLoginUsername('');
+    setLoginPassword('');
+    setLoginError('');
+    showNotification('Logged out from Admin Control Panel.');
+  };
 
   // Reload inventory
   const refreshList = () => {
@@ -400,10 +448,214 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
         boxSizing: 'border-box',
       }}
     >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: 1180,
+      {!isAuthenticated ? (
+        /* Dedicated Admin Authentication Gate */
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 440,
+            backgroundColor: '#181412',
+            border: '1px solid #3d322c',
+            borderRadius: 16,
+            boxShadow: '0 24px 70px rgba(0,0,0,0.7)',
+            padding: '36px 32px',
+            color: '#fdfbf7',
+            fontFamily: "'Inter', sans-serif",
+            position: 'relative',
+          }}
+        >
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            style={{
+              position: 'absolute',
+              top: 16,
+              right: 16,
+              background: 'transparent',
+              border: 'none',
+              color: '#a6988f',
+              cursor: 'pointer',
+              padding: 4,
+              borderRadius: 6,
+            }}
+            title="Close"
+          >
+            <X size={20} />
+          </button>
+
+          {/* Icon & Title */}
+          <div style={{ textAlign: 'center', marginBottom: 26 }}>
+            <div
+              style={{
+                width: 52,
+                height: 52,
+                borderRadius: 14,
+                background: 'linear-gradient(135deg, #b1704e 0%, #703c21 100%)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 8px 24px rgba(177,112,78,0.4)',
+                marginBottom: 16,
+              }}
+            >
+              <Shield size={26} color="#ffffff" />
+            </div>
+            <h2
+              style={{
+                fontFamily: "'Outfit', sans-serif",
+                fontSize: '1.45rem',
+                fontWeight: 800,
+                color: '#ffffff',
+                marginBottom: 6,
+              }}
+            >
+              MACSAC Studio Admin
+            </h2>
+            <p style={{ fontSize: '0.84rem', color: '#a6988f', lineHeight: 1.45 }}>
+              Staff & System Management Portal. Enter your administrator credentials to proceed.
+            </p>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleAdminLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {loginError && (
+              <div
+                style={{
+                  background: 'rgba(239, 68, 68, 0.12)',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
+                  color: '#fca5a5',
+                  padding: '10px 14px',
+                  borderRadius: 8,
+                  fontSize: '0.82rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                <span>{loginError}</span>
+              </div>
+            )}
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#e6bfa7', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Username
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="text"
+                  value={loginUsername}
+                  onChange={(e) => setLoginUsername(e.target.value)}
+                  placeholder="admin"
+                  required
+                  autoFocus
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    background: '#100d0c',
+                    border: '1px solid #3d322c',
+                    borderRadius: 8,
+                    padding: '10px 14px 10px 38px',
+                    color: '#ffffff',
+                    fontSize: '0.9rem',
+                    outline: 'none',
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = '#b1704e')}
+                  onBlur={(e) => (e.target.style.borderColor = '#3d322c')}
+                />
+                <User size={16} color="#a6988f" style={{ position: 'absolute', left: 12, top: 12 }} />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#e6bfa7', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Password
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="••••••••••••"
+                  required
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    background: '#100d0c',
+                    border: '1px solid #3d322c',
+                    borderRadius: 8,
+                    padding: '10px 40px 10px 38px',
+                    color: '#ffffff',
+                    fontSize: '0.9rem',
+                    outline: 'none',
+                  }}
+                  onFocus={(e) => (e.target.style.borderColor = '#b1704e')}
+                  onBlur={(e) => (e.target.style.borderColor = '#3d322c')}
+                />
+                <Lock size={16} color="#a6988f" style={{ position: 'absolute', left: 12, top: 12 }} />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: 12,
+                    top: 10,
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#a6988f',
+                    cursor: 'pointer',
+                    padding: 0,
+                  }}
+                  title={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="btn-primary"
+              style={{
+                width: '100%',
+                padding: '12px 18px',
+                borderRadius: 8,
+                marginTop: 8,
+                fontSize: '0.92rem',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 8,
+              }}
+            >
+              <Shield size={16} />
+              <span>Authenticate & Enter Studio</span>
+            </button>
+          </form>
+
+          {/* Credentials Helper for Administrator */}
+          <div
+            style={{
+              marginTop: 22,
+              padding: '10px 12px',
+              background: 'rgba(177,112,78,0.08)',
+              border: '1px dashed rgba(177,112,78,0.25)',
+              borderRadius: 8,
+              fontSize: '0.74rem',
+              color: '#d4c7bd',
+              textAlign: 'center',
+            }}
+          >
+            Staff Credentials: <strong>admin</strong> / <strong>macsac@admin2026</strong>
+          </div>
+        </div>
+      ) : (
+        <>
+          <div
+            style={{
+              width: '100%',
+              maxWidth: 1180,
           height: 'min(92vh, 880px)',
           backgroundColor: '#181412',
           border: '1px solid #3d322c',
@@ -506,6 +758,37 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                 <strong style={{ color: '#f59e0b' }}>{hiddenTemplatesCount}</strong>
               </div>
             </div>
+
+            {/* Log Out button */}
+            <button
+              onClick={handleAdminLogout}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 6,
+                background: '#231c19',
+                border: '1px solid #4a3c35',
+                color: '#e6bfa7',
+                padding: '7px 14px',
+                borderRadius: 8,
+                fontSize: '0.8rem',
+                fontWeight: 600,
+                cursor: 'pointer',
+                transition: 'all 0.15s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#dc2626';
+                e.currentTarget.style.color = '#fca5a5';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#4a3c35';
+                e.currentTarget.style.color = '#e6bfa7';
+              }}
+              title="Log Out of Administrator Portal"
+            >
+              <LogOut size={14} />
+              <span>Log Out</span>
+            </button>
 
             <button
               onClick={onClose}
@@ -1952,6 +2235,8 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

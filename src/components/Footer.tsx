@@ -4,9 +4,10 @@ import { ExternalLink, Heart, Shield, MessageSquare } from 'lucide-react';
 interface FooterProps {
   onExploreTemplates: () => void;
   onOpenHowItWorks: () => void;
+  onOpenAdmin?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onExploreTemplates, onOpenHowItWorks }) => {
+export const Footer: React.FC<FooterProps> = ({ onExploreTemplates, onOpenHowItWorks, onOpenAdmin }) => {
   return (
     <footer
       style={{
@@ -169,10 +170,42 @@ export const Footer: React.FC<FooterProps> = ({ onExploreTemplates, onOpenHowItW
           }}
         >
           <p>© {new Date().getFullYear()} MACSAC Studio • An initiative by MACSAC Multimedia. All rights reserved.</p>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
             <span>Crafted for creators & businesses</span>
             <span>•</span>
             <span style={{ color: 'var(--copper-medium)', fontWeight: 600 }}>100% Free Website Code</span>
+            <span>•</span>
+            <a
+              href="#admin"
+              onClick={(e) => {
+                e.preventDefault();
+                if (onOpenAdmin) onOpenAdmin();
+                else window.location.hash = '#admin';
+              }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 5,
+                color: 'var(--text-muted)',
+                textDecoration: 'none',
+                fontSize: '0.78rem',
+                opacity: 0.65,
+                transition: 'opacity 0.2s ease, color 0.2s ease',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.color = 'var(--copper-medium)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '0.65';
+                e.currentTarget.style.color = 'var(--text-muted)';
+              }}
+              title="Administrator Portal (Password Protected)"
+            >
+              <Shield size={12} />
+              <span>Admin Portal</span>
+            </a>
           </div>
         </div>
 

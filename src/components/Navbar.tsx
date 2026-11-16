@@ -13,7 +13,6 @@ import {
   Menu,
   X,
   ArrowRight,
-  Shield,
 } from 'lucide-react';
 import { UserAccount, UserWebsiteDetails } from '../types';
 
@@ -26,7 +25,6 @@ interface NavbarProps {
   onOpenHowItWorks: () => void;
   onStartCreating: () => void;
   onOpenAiAgent?: () => void;
-  onOpenAdmin?: () => void;
   currentUser: UserAccount | null;
   onOpenAuth: () => void;
   onLogout: () => void;
@@ -45,7 +43,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenHowItWorks,
   onStartCreating,
   onOpenAiAgent,
-  onOpenAdmin,
   currentUser,
   onOpenAuth,
   onLogout,
@@ -64,175 +61,169 @@ export const Navbar: React.FC<NavbarProps> = ({
   return (
     <header className="studio-nav">
       <div className="container nav-wrapper">
-        {/* Left: Brand Logo */}
-        <a
-          href="/"
-          onClick={(e) => {
-            e.preventDefault();
-            if (onGoHome) {
-              onGoHome();
-            } else {
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-          }}
-          className="brand-link"
-          title="MACSAC Studio — Home"
-        >
-          <img
-            src="/m-logo.png"
-            alt="MACSAC Logo"
-            className="brand-logo-img"
-          />
-          <div className="brand-text-block">
-            <span className="brand-title">
-              MACSAC <span className="studio-pill">STUDIO</span>
-            </span>
-            <span className="brand-sub">By MACSAC Multimedia</span>
-          </div>
-        </a>
-
-        {/* Center: Desktop Nav Links (Horizontally Centered) */}
-        <nav className="nav-links">
-          <button
-            onClick={() => handleLinkClick(onExploreTemplates)}
-            className="nav-link"
+        {/* Zone 1: Left Brand Logo */}
+        <div className="nav-zone nav-zone-left">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              if (onGoHome) {
+                onGoHome();
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+            className="brand-link"
+            title="MACSAC Studio — Home"
           >
-            <Compass size={16} />
-            <span>Explore Templates</span>
-          </button>
+            <img
+              src="/m-logo.png"
+              alt="MACSAC Logo"
+              className="brand-logo-img"
+            />
+            <div className="brand-text-block">
+              <span className="brand-title">
+                MACSAC <span className="studio-pill">STUDIO</span>
+              </span>
+              <span className="brand-sub">By MACSAC Multimedia</span>
+            </div>
+          </a>
+        </div>
 
-          {/* Website Details indicator / button */}
-          <div className="nav-brand-group">
+        {/* Zone 2: Center Navigation Capsule (Distinct Island, No Overlap) */}
+        <div className="nav-zone nav-zone-center">
+          <nav className="nav-links">
             <button
-              onClick={() => handleLinkClick(onEditDetails)}
-              className={`nav-link ${websiteDetails?.brandName ? 'nav-link-active-brand' : ''}`}
-              title="Edit your website details and keywords"
+              onClick={() => handleLinkClick(onExploreTemplates)}
+              className="nav-link"
             >
-              <FileEdit size={16} />
-              {websiteDetails?.brandName ? (
-                <span className="nav-brand-text">
-                  Brand: <strong>{websiteDetails.brandName}</strong>
+              <Compass size={16} />
+              <span>Explore Templates</span>
+            </button>
+
+            {/* Website Details indicator / button */}
+            <div className="nav-brand-group">
+              <button
+                onClick={() => handleLinkClick(onEditDetails)}
+                className={`nav-link ${websiteDetails?.brandName ? 'nav-link-active-brand' : ''}`}
+                title="Edit your website details and keywords"
+              >
+                <FileEdit size={16} />
+                {websiteDetails?.brandName ? (
+                  <span className="nav-brand-text">
+                    Brand: <strong>{websiteDetails.brandName}</strong>
+                  </span>
+                ) : (
+                  <span>Enter Details</span>
+                )}
+              </button>
+
+              {websiteDetails?.brandName && onClearDetails && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onClearDetails();
+                  }}
+                  className="nav-clear-btn"
+                  title="Clear website details & start fresh"
+                >
+                  <XCircle size={14} />
+                </button>
+              )}
+            </div>
+
+            <button
+              onClick={() => handleLinkClick(onOpenHowItWorks)}
+              className="nav-link"
+            >
+              <HelpCircle size={16} />
+              <span>How It Works</span>
+            </button>
+
+            <button
+              onClick={() => handleLinkClick(onOpenProjects)}
+              className="nav-link"
+            >
+              <FolderGit2 size={16} />
+              <span>My Websites</span>
+              {savedProjectsCount > 0 && (
+                <span className="nav-projects-badge">
+                  {savedProjectsCount}
                 </span>
-              ) : (
-                <span>Enter Details</span>
               )}
             </button>
+          </nav>
+        </div>
 
-            {websiteDetails?.brandName && onClearDetails && (
+        {/* Zone 3: Right Action Controls */}
+        <div className="nav-zone nav-zone-right">
+          <div className="nav-controls">
+            {/* AI Consultant Trigger */}
+            {onOpenAiAgent && (
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onClearDetails();
-                }}
-                className="nav-clear-btn"
-                title="Clear website details & start fresh"
+                onClick={onOpenAiAgent}
+                className="btn-ai-nav"
+                title="Open AI Website Setup & Management Agent"
               >
-                <XCircle size={14} />
+                <Sparkles size={14} color="var(--copper-light)" />
+                <span>AI Agent</span>
               </button>
             )}
-          </div>
 
-          <button
-            onClick={() => handleLinkClick(onOpenHowItWorks)}
-            className="nav-link"
-          >
-            <HelpCircle size={16} />
-            <span>How It Works</span>
-          </button>
-
-          <button
-            onClick={() => handleLinkClick(onOpenProjects)}
-            className="nav-link"
-          >
-            <FolderGit2 size={16} />
-            <span>My Websites</span>
-            {savedProjectsCount > 0 && (
-              <span className="nav-projects-badge">
-                {savedProjectsCount}
-              </span>
-            )}
-          </button>
-        </nav>
-
-        {/* Right: Controls & Actions (Vertically Aligned 38px baseline) */}
-        <div className="nav-controls">
-          {/* Admin Panel Trigger */}
-          {onOpenAdmin && (
+            {/* Theme Switcher */}
             <button
-              onClick={onOpenAdmin}
-              className="btn-admin-nav"
-              title="Open Admin Control Panel"
+              onClick={onToggleTheme}
+              className="theme-toggle-btn"
+              title={currentTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              aria-label="Toggle theme"
             >
-              <Shield size={14} color="var(--copper-medium)" />
-              <span>Admin</span>
+              {currentTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
-          )}
 
-          {/* AI Consultant Trigger */}
-          {onOpenAiAgent && (
-            <button
-              onClick={onOpenAiAgent}
-              className="btn-ai-nav"
-              title="Open AI Website Setup & Management Agent"
-            >
-              <Sparkles size={14} color="var(--copper-light)" />
-              <span>AI Agent</span>
-            </button>
-          )}
-
-          {/* Theme Switcher */}
-          <button
-            onClick={onToggleTheme}
-            className="theme-toggle-btn"
-            title={currentTheme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            aria-label="Toggle theme"
-          >
-            {currentTheme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
-
-          {/* User Account / Auth */}
-          {currentUser ? (
-            <div className="user-profile-group">
-              <div className="user-badge-nav">
-                <div className="user-avatar-initial">
-                  {currentUser.fullName.charAt(0).toUpperCase()}
+            {/* User Account / Auth */}
+            {currentUser ? (
+              <div className="user-profile-group">
+                <div className="user-badge-nav">
+                  <div className="user-avatar-initial">
+                    {currentUser.fullName.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="user-name-text">{currentUser.fullName}</span>
                 </div>
-                <span className="user-name-text">{currentUser.fullName}</span>
+                <button
+                  onClick={onLogout}
+                  className="btn-logout-nav"
+                  title="Log Out"
+                >
+                  <LogOut size={15} />
+                </button>
               </div>
+            ) : (
               <button
-                onClick={onLogout}
-                className="btn-logout-nav"
-                title="Log Out"
+                onClick={onOpenAuth}
+                className="btn-auth-nav"
               >
-                <LogOut size={15} />
+                Sign In
               </button>
-            </div>
-          ) : (
+            )}
+
+            {/* Start Creating CTA */}
             <button
-              onClick={onOpenAuth}
-              className="btn-auth-nav"
+              onClick={onStartCreating}
+              className="btn-primary btn-sm nav-cta-btn"
             >
-              Sign In
+              <span>Start Creating</span>
             </button>
-          )}
 
-          {/* Start Creating CTA */}
-          <button
-            onClick={onStartCreating}
-            className="btn-primary btn-sm nav-cta-btn"
-          >
-            <span>Start Creating</span>
-          </button>
-
-          {/* Mobile Menu Hamburger Toggle */}
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="nav-mobile-toggle"
-            aria-label="Toggle Navigation Menu"
-            title="Menu"
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+            {/* Mobile Menu Hamburger Toggle */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="nav-mobile-toggle"
+              aria-label="Toggle Navigation Menu"
+              title="Menu"
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -288,16 +279,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Sparkles size={18} color="var(--copper-light)" />
                 <span>AI Website Consultant</span>
-              </button>
-            )}
-
-            {onOpenAdmin && (
-              <button
-                onClick={() => handleLinkClick(onOpenAdmin)}
-                className="nav-mobile-link"
-              >
-                <Shield size={18} color="var(--copper-medium)" />
-                <span>Admin Control Panel</span>
               </button>
             )}
 
